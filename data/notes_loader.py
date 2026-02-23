@@ -13,4 +13,10 @@ def load_notes(path: str = "data/raw/mtsamples.csv") -> pd.DataFrame:
     print(f"shape: {df.shape}")
     print(f"columns: {df.columns.tolist()}")
 
+    if "transcription" not in df.columns:
+        raise ValueError("Expected 'transcription' column not found in the notes data")
+
+    df = df.rename(columns={"transcription": "note_text"})
+    df = df[["note_text"]].copy()
+
     return df
