@@ -35,29 +35,6 @@ Biomedical Named Entity Recognition
 Structured Entity Output
 
 
----
-
-## Repository Structure
-
-
-spatial-human-anatomy/
-│
-├── data/
-│ ├── raw/
-│ └── processed/
-│
-├── src/
-│ ├── notes_loader.py
-│ ├── notes_cleaner.py
-│ ├── notes_normalize.py
-│ ├── ner_spacey.py
-│ ├── load_biobert.py
-│ └── run_pipeline.py
-│
-└── README.md
-
-
----
 
 ## Data Processing
 
