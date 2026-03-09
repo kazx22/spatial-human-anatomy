@@ -187,6 +187,19 @@ The pipelines expect the processed dataset located at:
 
 `data/processed/cleaned_notes.csv`
 
+# Project Report
+
+A detailed report describing the NER pipeline implementation, model comparison, and experimental findings is available here:
+
+[NER Model Comparison Report](docs/ner_model_comparison.pdf)
+
+The report discusses:
+
+- SciSpacy biomedical NER pipeline
+- Transformer-based NER experiments (BioBERT / PubMedBERT / ClinicalBERT)
+- Implementation challenges such as token limits and subword tokenization
+- Runtime performance comparison between models
+
 ## Future Work
 
 This project is the first stage of a larger research direction focused on spatial representations of human anatomy.
