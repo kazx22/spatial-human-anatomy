@@ -149,40 +149,43 @@ python -m src.run_pipeline
 ```
 this will generate 
 
-data/processed/cleaned_notes.csv
+`data/processed/cleaned_notes.csv`
 
 Run the SciSpacy NER Pipeline
 
 This extracts biomedical entities using the SciSpacy model.
 
-python -m src.load_scispacy
+`python -m src.load_scispacy`
 
 Output will be saved to:
 
-data/processed/ner/scispacy/entities.jsonl
+`data/processed/ner/scispacy/entities.jsonl`
+
 3. Run the BioBERT / PubMedBERT Transformer Pipeline
 
 This pipeline combines a disease detection model and a chemical detection model to extract biomedical entities.
 
-python -m src.load_biobert
+`python -m src.load_biobert`
 
 Output will be saved to:
 
-data/processed/ner/transformers/biobert/biobert_entities.jsonl
+`data/processed/ner/transformers/biobert/biobert_entities.jsonl`
+
 4. Run the ClinicalBERT NER Pipeline
 
 This runs the ClinicalBERT-based NER model for comparison with SciSpacy and BioBERT pipelines.
 
-python -m src.load_clinicalbert
+`python -m src.load_clinicalbert`
 
 Output will be saved to:
 
-data/processed/ner/transformers/clinicalbert/clinicalbert_entities.jsonl
+`data/processed/ner/transformers/clinicalbert/clinicalbert_entities.jsonl`
+
 Notes
 
 The pipelines expect the processed dataset located at:
 
-data/processed/cleaned_notes.csv
+`data/processed/cleaned_notes.csv`
 
 ## Future Work
 
