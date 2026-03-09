@@ -183,7 +183,7 @@ Run the SciSpacy NER Pipeline
 
 This extracts biomedical entities using the SciSpacy model.
 
-`python -m src.load_scispacy`
+`python -m src.ner_spacey`
 
 Output will be saved to:
 
@@ -203,7 +203,7 @@ Output will be saved to:
 
 This runs the ClinicalBERT-based NER model for comparison with SciSpacy and BioBERT pipelines.
 
-`python -m src.load_clinicalbert`
+`python -m src.load_clinical_bert`
 
 Output will be saved to:
 
