@@ -103,20 +103,38 @@ Example:
 
 ## Transformer-Based NER Experiments
 
-The repository also includes experimental support for transformer-based biomedical NER using BioBERT.
+The repository also includes experimental support for transformer-based biomedical NER using models from the HuggingFace Transformers library.
 
-Model:
+### Models Used
+
+- Disease detection:  
+  `sarahmiller137/BiomedNLP-PubMedBERT-base-uncased-abstract-fulltext-ft-ncbi-disease`
+
+- Chemical / medication detection:  
+  `OpenMed/OpenMed-NER-ChemicalDetect-PubMed-335M`
+
+- Additional comparison model:  
+  `samrawal/bert-base-uncased_clinical-ner`
+
+Because no single transformer model reliably detects both disease and chemical entities in clinical notes, separate models are used for each entity type. The outputs of these models are then combined and post-processed to produce a unified list of biomedical entities.
+
+This setup allows comparison between:
+
+- **SciSpacy biomedical NER** (`en_ner_bc5cdr_md`)
+- **Transformer-based biomedical NER** (PubMedBERT + chemical detection models)
+- **Clinical-domain transformer models** (ClinicalBERT)
 
 
-Ishan0612/biobert-ner-disease-ncbi
 
+## Experimental Findings
 
-This allows comparison between:
+SciSpacy was more stable on long clinical notes
 
-- SciSpacy biomedical NER
-- Transformer-based NER models
+transformer models needed more preprocessing/post-processing
 
----
+transformers were slower
+
+SciSpacy is the main pipeline, transformers are comparison baselines
 
 ## Future Work
 
