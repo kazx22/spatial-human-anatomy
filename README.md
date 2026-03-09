@@ -34,7 +34,32 @@ Biomedical Named Entity Recognition
 ↓
 Structured Entity Output
 
+Environment
 
+Experiments were conducted using the following setup:
+
+Hardware
+
+CPU: AMD Ryzen 6900HX
+GPU: NVIDIA RTX 3070 Ti (Mobile)
+
+RAM: 16 GB
+
+Software
+
+Python 3.x
+
+SciSpacy
+
+HuggingFace Transformers
+
+Pandas
+
+PyTorch
+
+Install dependencies:
+
+```pip install -r requirements\base.txt```
 
 ## Data Processing
 
@@ -186,6 +211,19 @@ Notes
 The pipelines expect the processed dataset located at:
 
 `data/processed/cleaned_notes.csv`
+
+# Project Report
+
+A detailed report describing the NER pipeline implementation, model comparison, and experimental findings is available here:
+
+[NER Model Comparison Report](docs/ner_model_comparison.pdf)
+
+The report discusses:
+
+- SciSpacy biomedical NER pipeline
+- Transformer-based NER experiments (BioBERT / PubMedBERT / ClinicalBERT)
+- Implementation challenges such as token limits and subword tokenization
+- Runtime performance comparison between models
 
 ## Future Work
 
