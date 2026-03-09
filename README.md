@@ -103,20 +103,89 @@ Example:
 
 ## Transformer-Based NER Experiments
 
-The repository also includes experimental support for transformer-based biomedical NER using BioBERT.
+The repository also includes experimental support for transformer-based biomedical NER using models from the HuggingFace Transformers library.
 
-Model:
+### Models Used
+
+- Disease detection:  
+  `sarahmiller137/BiomedNLP-PubMedBERT-base-uncased-abstract-fulltext-ft-ncbi-disease`
+
+- Chemical / medication detection:  
+  `OpenMed/OpenMed-NER-ChemicalDetect-PubMed-335M`
+
+- Additional comparison model:  
+  `samrawal/bert-base-uncased_clinical-ner`
+
+Because no single transformer model reliably detects both disease and chemical entities in clinical notes, separate models are used for each entity type. The outputs of these models are then combined and post-processed to produce a unified list of biomedical entities.
+
+This setup allows comparison between:
+
+- **SciSpacy biomedical NER** (`en_ner_bc5cdr_md`)
+- **Transformer-based biomedical NER** (PubMedBERT + chemical detection models)
+- **Clinical-domain transformer models** (ClinicalBERT)
 
 
-Ishan0612/biobert-ner-disease-ncbi
 
+## Experimental Findings
 
-This allows comparison between:
+SciSpacy was more stable on long clinical notes
 
-- SciSpacy biomedical NER
-- Transformer-based NER models
+transformer models needed more preprocessing/post-processing
 
----
+transformers were slower
+
+SciSpacy is the main pipeline, transformers are comparison baselines
+
+## How to Run
+
+All scripts are executed from the root of the repository.
+
+### 1. Run the Data Processing Pipeline
+
+This step loads and cleans the clinical notes dataset and prepares the processed file used by the NER pipelines.
+
+```bash
+python -m src.run_pipeline
+```
+this will generate 
+
+`data/processed/cleaned_notes.csv`
+
+Run the SciSpacy NER Pipeline
+
+This extracts biomedical entities using the SciSpacy model.
+
+`python -m src.load_scispacy`
+
+Output will be saved to:
+
+`data/processed/ner/scispacy/entities.jsonl`
+
+3. Run the BioBERT / PubMedBERT Transformer Pipeline
+
+This pipeline combines a disease detection model and a chemical detection model to extract biomedical entities.
+
+`python -m src.load_biobert`
+
+Output will be saved to:
+
+`data/processed/ner/transformers/biobert/biobert_entities.jsonl`
+
+4. Run the ClinicalBERT NER Pipeline
+
+This runs the ClinicalBERT-based NER model for comparison with SciSpacy and BioBERT pipelines.
+
+`python -m src.load_clinicalbert`
+
+Output will be saved to:
+
+`data/processed/ner/transformers/clinicalbert/clinicalbert_entities.jsonl`
+
+Notes
+
+The pipelines expect the processed dataset located at:
+
+`data/processed/cleaned_notes.csv`
 
 ## Future Work
 
