@@ -1,5 +1,8 @@
 # Spatial Human Anatomy – Clinical Text to Knowledge Graph
 
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.18928353.svg)](https://doi.org/10.5281/zenodo.18928353)
+
+
 This project explores how clinical narratives can be transformed into structured representations that support spatial reasoning about the human body.
 
 The goal is to convert unstructured clinical notes into machine-readable medical entities that can later be used to construct body-centric knowledge graphs and support graph-based learning methods.
@@ -180,7 +183,7 @@ Run the SciSpacy NER Pipeline
 
 This extracts biomedical entities using the SciSpacy model.
 
-`python -m src.load_scispacy`
+`python -m src.ner_spacey`
 
 Output will be saved to:
 
@@ -200,7 +203,7 @@ Output will be saved to:
 
 This runs the ClinicalBERT-based NER model for comparison with SciSpacy and BioBERT pipelines.
 
-`python -m src.load_clinicalbert`
+`python -m src.load_clinical_bert`
 
 Output will be saved to:
 
