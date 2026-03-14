@@ -386,7 +386,7 @@ data/
 src/
 ├── pipeline.py
 ├── benchmark.py
-└── utils/
+
 
 docs/
 └── Biomedical_NER_Clinical_Notes.pdf
