@@ -350,13 +350,24 @@ pip install -r requirements/base.txt
 
 Run the NER pipeline:
 
+Run the NER pipeline:
+
 ```bash
 python -m src.pipeline
+
+python -m load_biobert
+
+python -m nerspacey
+
+python -m load_clinical_bert
+
 ```
 
 Run the benchmark:
 
 ```bash
+python -m cadidate_gold 
+
 python -m src.benchmark
 ```
 
