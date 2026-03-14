@@ -33,8 +33,6 @@ Raw Clinical Notes
 ↓
 Text Cleaning
 ↓
-Text Normalization
-↓
 Biomedical Named Entity Recognition
 ├── SciSpacy
 ├── BioBERT
