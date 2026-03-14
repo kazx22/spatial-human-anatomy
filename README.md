@@ -229,7 +229,6 @@ Metrics include:
 - Precision
 - Recall
 - F1-score
-- Classification report
 
 These metrics provide a clear comparison between biomedical NER models.
 
