@@ -1,4 +1,5 @@
 import json
+from src.graph import add_result, plot_all
 from pathlib import Path
 from collections import defaultdict
 from seqeval.metrics import (
@@ -67,7 +68,7 @@ def span_to_bio(text, entities):
     return tokens, labels
 
 
-def evaluate_model(notes, gold_by_row, pred_by_row, model_name):
+def evaluate_model(notes, gold_by_row, pred_by_row, model_name, runtime):
     y_true = []
     y_pred = []
 
@@ -93,6 +94,12 @@ def evaluate_model(notes, gold_by_row, pred_by_row, model_name):
     print(f"Precision: {precision:.4f}")
     print(f"Recall:    {recall:.4f}")
     print(f"F1-score:  {f1:.4f}")
+    print(classification_report(y_true, y_pred, digits=4))
+
+    report_dict = classification_report(y_true, y_pred, digits=4, output_dict=True)
+    print(classification_report(y_true, y_pred, digits=4))
+
+    add_result(model_name, precision, recall, f1, report_dict, runtime)
 
 
 # C:\University\Projects\spatial-human-anatomy\data\gold\candidate_gold_entities.jsonl
@@ -125,9 +132,13 @@ def main():
     biobert_by_row = group_by_row(biobert_entities)
     clinicalbert_by_row = group_by_row(clinicalbert_entities)
 
-    evaluate_model(notes, gold_by_row, scispacy_by_row, "SciSpacy")
-    evaluate_model(notes, gold_by_row, biobert_by_row, "BioBERT")
-    evaluate_model(notes, gold_by_row, clinicalbert_by_row, "ClinicalBERT")
+    evaluate_model(notes, gold_by_row, scispacy_by_row, "SciSpacy", runtime=0.2186)
+    evaluate_model(notes, gold_by_row, biobert_by_row, "BioBERT", runtime=6.34)
+    evaluate_model(
+        notes, gold_by_row, clinicalbert_by_row, "ClinicalBERT", runtime=0.9035
+    )
+
+    plot_all()
 
 
 if __name__ == "__main__":

@@ -6,3 +6,4 @@ transformers
 spacy==3.7.2
 scispacy==0.5.4
 seqeval
+matplotlib
