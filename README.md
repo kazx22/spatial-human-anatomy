@@ -405,7 +405,10 @@ data/
             │   └── biobert_entities.jsonl
             └── clinicalbert/
                 └── clinicalbert_entities_clean.jsonl
-
+figure/
+├── model_performance.png
+├── per_label_f1.png
+└── runtime_comparison.png
 src/
 ├── pipeline.py
 ├── benchmark.py
