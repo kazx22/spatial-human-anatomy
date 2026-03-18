@@ -1,4 +1,5 @@
 
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.18928352.svg)](https://doi.org/10.5281/zenodo.18928352)
 # Spatial Human Anatomy — Biomedical NER from Clinical Notes
 
 This project explores how **clinical narratives can be transformed into structured biomedical information** that can later support **knowledge graph construction and spatial reasoning over the human body**.
@@ -350,13 +351,24 @@ pip install -r requirements/base.txt
 
 Run the NER pipeline:
 
+Run the NER pipeline:
+
 ```bash
 python -m src.pipeline
+
+python -m load_biobert
+
+python -m nerspacey
+
+python -m load_clinical_bert
+
 ```
 
 Run the benchmark:
 
 ```bash
+python -m cadidate_gold 
+
 python -m src.benchmark
 ```
 
