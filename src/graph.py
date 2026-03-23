@@ -35,7 +35,7 @@ def plot_model_performance():
     plt.xticks(x, models)
     plt.ylim(0, 1)
     plt.ylabel("Score")
-    plt.title("Model Performance Comparison")
+    plt.title("Model Performance Comparison (Micro Average)")
     plt.legend()
     plt.tight_layout()
     plt.savefig(
@@ -85,6 +85,36 @@ def print_per_label_table():
     print(df.to_string(index=False))
 
 
+def print_summary_table():
+    rows = []
+
+    for r in RESULTS:
+        report = r["report"]
+
+        rows.append(
+            {
+                "Model": r["model"],
+                "Micro Precision": report.get("micro avg", {}).get(
+                    "precision", r["precision"]
+                ),
+                "Micro Recall": report.get("micro avg", {}).get("recall", r["recall"]),
+                "Micro F1": report.get("micro avg", {}).get("f1-score", r["f1"]),
+                "Macro Precision": report.get("macro avg", {}).get("precision", 0),
+                "Macro Recall": report.get("macro avg", {}).get("recall", 0),
+                "Macro F1": report.get("macro avg", {}).get("f1-score", 0),
+                "Weighted Precision": report.get("weighted avg", {}).get(
+                    "precision", 0
+                ),
+                "Weighted Recall": report.get("weighted avg", {}).get("recall", 0),
+                "Weighted F1": report.get("weighted avg", {}).get("f1-score", 0),
+            }
+        )
+
+    df = pd.DataFrame(rows)
+    print("\nOverall Summary Performance")
+    print(df.to_string(index=False))
+
+
 def plot_per_label_f1():
     models = [r["model"] for r in RESULTS]
     x = np.arange(len(models))
@@ -114,5 +144,6 @@ def plot_per_label_f1():
 def plot_all():
     plot_model_performance()
     plot_runtime_comparison()
+    print_summary_table()
     print_per_label_table()
     plot_per_label_f1()
