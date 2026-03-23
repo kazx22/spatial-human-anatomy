@@ -341,6 +341,20 @@ ClinicalBERT falls between SciSpacy and BioBERT in runtime depending on preproce
 
 ---
 
+# Visual Results
+
+The following figures summarize model benchmarking performance, per-label F1-score, and runtime comparison.
+
+## Overall Model Performance
+![Overall model performance](figure/model_performance.png)
+
+## Per-label F1-score
+![Per-label F1-score](figure/per_label_f1.png)
+
+## Runtime Comparison
+![Runtime comparison](figure/runtime_comparison.png)
+
+
 # Running the Project
 
 Install dependencies:
@@ -391,7 +405,10 @@ data/
             │   └── biobert_entities.jsonl
             └── clinicalbert/
                 └── clinicalbert_entities_clean.jsonl
-
+figure/
+├── model_performance.png
+├── per_label_f1.png
+└── runtime_comparison.png
 src/
 ├── pipeline.py
 ├── benchmark.py
