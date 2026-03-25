@@ -354,6 +354,13 @@ The following figures summarize model benchmarking performance, per-label F1-sco
 ## Runtime Comparison
 ![Runtime comparison](figure/runtime_comparison.png)
 
+## Per-Label Performance Analysis
+
+To better understand model behaviour, performance was evaluated separately for each entity type (e.g., DISEASE and CHEMICAL).
+
+This provides deeper insight beyond aggregate metrics and highlights differences in how models handle specific biomedical categories.
+
+![Per Label Performance](figure/per_label_performance.png)
 
 # Running the Project
 
