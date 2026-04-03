@@ -377,11 +377,11 @@ Run the NER pipeline:
 ```bash
 python -m src.pipeline
 
-python -m load_biobert
+python -m src.load_biobert
 
-python -m nerspacey
+python -m src.nerspacey
 
-python -m load_clinical_bert
+python -m src.load_clinical_bert
 
 ```
 
@@ -419,6 +419,9 @@ figure/
 src/
 ├── pipeline.py
 ├── benchmark.py
+├── load_biobert.py
+├── nerspacey.py
+├── load_clinical_bert.py
 
 
 docs/
