@@ -97,9 +97,22 @@ def evaluate_model(notes, gold_by_row, pred_by_row, model_name, runtime):
     print(classification_report(y_true, y_pred, digits=4))
 
     report_dict = classification_report(y_true, y_pred, digits=4, output_dict=True)
+
     print(classification_report(y_true, y_pred, digits=4))
 
-    add_result(model_name, precision, recall, f1, report_dict, runtime)
+    flat_y_true = [label for row in y_true for label in row]
+    flat_y_pred = [label for row in y_pred for label in row]
+
+    add_result(
+        model_name,
+        precision,
+        recall,
+        f1,
+        report_dict,
+        runtime,
+        y_true=flat_y_true,
+        y_pred=flat_y_pred,
+    )
 
 
 # C:\University\Projects\spatial-human-anatomy\data\gold\candidate_gold_entities.jsonl
@@ -115,6 +128,9 @@ def main():
     clinicalbert_path = Path(
         "data/processed/ner/transformers/clinicalbert/clinicalbert_entities_clean.jsonl"
     )
+    bioelectra_path = Path(
+        "data/processed/ner/transformers/bioelectra/bioelectra_entities.jsonl"
+    )
 
     df = pd.read_csv(notes_path)
 
@@ -126,17 +142,20 @@ def main():
     scispacy_entities = load_jsonl(scispacy_path)
     biobert_entities = load_jsonl(biobert_path)
     clinicalbert_entities = load_jsonl(clinicalbert_path)
+    bioelectra_entities = load_jsonl(bioelectra_path)
 
     gold_by_row = group_by_row(gold_entities)
     scispacy_by_row = group_by_row(scispacy_entities)
     biobert_by_row = group_by_row(biobert_entities)
     clinicalbert_by_row = group_by_row(clinicalbert_entities)
+    bioelectra_by_row = group_by_row(bioelectra_entities)
 
     evaluate_model(notes, gold_by_row, scispacy_by_row, "SciSpacy", runtime=0.2186)
     evaluate_model(notes, gold_by_row, biobert_by_row, "BioBERT", runtime=6.34)
     evaluate_model(
         notes, gold_by_row, clinicalbert_by_row, "ClinicalBERT", runtime=0.9035
     )
+    evaluate_model(notes, gold_by_row, bioelectra_by_row, "BioELECTRA", runtime=0.1577)
 
     plot_all()
 

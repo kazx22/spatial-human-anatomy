@@ -1,11 +1,21 @@
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay
 
 RESULTS = []
 
 
-def add_result(model_name, precision, recall, f1, report_dict, runtime=None):
+def add_result(
+    model_name,
+    precision,
+    recall,
+    f1,
+    report_dict,
+    runtime=None,
+    y_true=None,
+    y_pred=None,
+):
     RESULTS.append(
         {
             "model": model_name,
@@ -14,6 +24,8 @@ def add_result(model_name, precision, recall, f1, report_dict, runtime=None):
             "f1": f1,
             "runtime": runtime,
             "report": report_dict,
+            "y_true": y_true,
+            "y_pred": y_pred,
         }
     )
 
@@ -141,9 +153,33 @@ def plot_per_label_f1():
     plt.show()
 
 
+def plot_confusion_matrix():
+    labels = ["O", "B-DISEASE", "I-DISEASE", "B-CHEMICAL", "I-CHEMICAL"]
+
+    for r in RESULTS:
+        if r["y_true"] is None or r["y_pred"] is None:
+            print(f"No y_true / y_pred found for {r['model']}")
+            continue
+
+        cm = confusion_matrix(r["y_true"], r["y_pred"], labels=labels)
+
+        fig, ax = plt.subplots(figsize=(7, 6))
+        disp = ConfusionMatrixDisplay(confusion_matrix=cm, display_labels=labels)
+        disp.plot(ax=ax, values_format="d")
+        plt.title(f"Confusion Matrix - {r['model']}")
+        plt.tight_layout()
+        plt.savefig(
+            f"figure/confusion_matrix_{r['model'].lower().replace(' ', '_')}.png",
+            dpi=300,
+            bbox_inches="tight",
+        )
+        plt.show()
+
+
 def plot_all():
     plot_model_performance()
     plot_runtime_comparison()
     print_summary_table()
     print_per_label_table()
     plot_per_label_f1()
+    plot_confusion_matrix()
