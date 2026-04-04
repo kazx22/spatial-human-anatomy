@@ -35,11 +35,12 @@ def entity_key(entity: dict):
     )
 
 
-def build_gold(scif, bertf, clinicf, output_file):
+def build_gold(scif, bertf, clinicf, bioelectraf, output_file):
     vote_table = defaultdict(list)
     sci_entities = loadJsonl(scif)
     bert_entities = loadJsonl(bertf)
     clinic_entities = loadJsonl(clinicf)
+    bioelectra_entities = loadJsonl(bioelectraf)
     for entity in sci_entities:
         key = entity_key(entity)
         vote_table[key].append("scispacy")
@@ -49,9 +50,12 @@ def build_gold(scif, bertf, clinicf, output_file):
     for entity in clinic_entities:
         key = entity_key(entity)
         vote_table[key].append("clinicalbert")
+    for entity in bioelectra_entities:
+        key = entity_key(entity)
+        vote_table[key].append("bioelectra")
     with open(output_file, "w", encoding="utf-8") as f:
         for key, voters in vote_table.items():
-            if len(voters) >= 2:
+            if len(voters) >= 3:
                 row_id, text, start_char, end_char, label = key
                 entity = {
                     "row_id": row_id,
@@ -75,9 +79,20 @@ if __name__ == "__main__":
         "data/processed/ner/transformers/biobert/biobert_entities_clean.jsonl",
     )
 
+    remove_TEST(
+        "data/processed/ner/transformers/bioelectra/bioelectra_entities.jsonl",
+        "data/processed/ner/transformers/bioelectra/bioelectra_entities_clean.jsonl",
+    )
+
+    remove_TEST(
+        "data/processed/ner/transformers/clinicalbert/clinicalbert_entities.jsonl",
+        "data/processed/ner/transformers/clinicalbert/clinicalbert_entities_clean.jsonl",
+    )
+
     build_gold(
         "data/processed/ner/scispacy/entities_clean.jsonl",
         "data/processed/ner/transformers/biobert/biobert_entities_clean.jsonl",
         "data/processed/ner/transformers/clinicalbert/clinicalbert_entities_clean.jsonl",
+        "data/processed/ner/transformers/bioelectra/bioelectra_entities_clean.jsonl",
         "data/gold/candidate_gold_entities.jsonl",
     )
