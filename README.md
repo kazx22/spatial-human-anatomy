@@ -1,478 +1,325 @@
-
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.18928352.svg)](https://doi.org/10.5281/zenodo.18928352)
+
 # Spatial Human Anatomy — Biomedical NER from Clinical Notes
 
-This project explores how **clinical narratives can be transformed into structured biomedical information** that can later support **knowledge graph construction and spatial reasoning over the human body**.
+This project explores how **clinical narratives can be transformed into structured biomedical information**, forming the foundation for **clinical knowledge graphs and spatial reasoning over human anatomy**.
 
-Clinical notes contain large amounts of valuable medical knowledge, but they are typically stored as **unstructured text**. Extracting biomedical entities such as **diseases** and **chemicals** is a key step toward building structured medical knowledge systems.
+Clinical notes contain valuable medical knowledge but are typically stored as **unstructured text**. Extracting entities such as **diseases** and **chemicals** is a critical first step toward building structured healthcare intelligence systems.
 
-This repository implements a **reproducible biomedical NLP pipeline** that processes clinical notes, extracts biomedical entities using multiple NER models, and evaluates their performance through benchmarking.
+This repository implements a **reproducible biomedical NLP pipeline** that:
+
+- extracts biomedical entities
+- compares multiple NER models
+- constructs a candidate gold dataset
+- benchmarks model performance against both pseudo and human gold standards
 
 ---
 
 # Project Goals
 
-The main objectives of this project are:
-
-- Extract biomedical entities from clinical narratives
-- Compare different biomedical Named Entity Recognition (NER) systems
-- Construct a candidate gold dataset using model agreement
-- Benchmark NER model performance
-- Prepare structured biomedical data for future knowledge graph construction
-
-The project currently focuses on **biomedical entity extraction and model evaluation**, which forms the foundation for future work on **clinical knowledge graphs and graph-based learning**.
+- Extract biomedical entities from clinical narratives  
+- Compare classical and transformer-based biomedical NER models  
+- Construct a **candidate gold dataset using model agreement**  
+- Benchmark models against both:
+  - candidate gold (pseudo labels)
+  - human-annotated BC5CDR dataset  
+- Prepare structured data for **knowledge graph construction**
 
 ---
 
 # Project Pipeline
-
-The repository implements the following processing pipeline:
-
-```
-
-Raw Clinical Notes
+Raw Clinical Notes / BC5CDR Dataset
 ↓
-Text Cleaning
+Text Processing
 ↓
 Biomedical Named Entity Recognition
 ├── SciSpacy
-├── BioBERT
-└── ClinicalBERT
+├── PubMedBERT
+├── ClinicalBERT
+└── BioELECTRA
 ↓
 Entity Aggregation
 ↓
-Candidate Gold Construction
+Candidate Gold Construction (≥ 3 models agree)
 ↓
-Benchmark Evaluation
+BIO Conversion
+↓
+Benchmark Evaluation (seqeval)
 ↓
 Structured Biomedical Entities
 
-```
+---
 
-Each stage of the pipeline converts raw clinical text into progressively more structured information.
+# Dataset
+
+## BC5CDR (BioCreative V)
+
+This project uses the **BC5CDR dataset**, a widely used biomedical benchmark containing:
+
+- Disease entities
+- Chemical entities
+- Human-annotated ground truth
+
+This enables **true evaluation against gold-standard annotations**, unlike scraped datasets.
 
 ---
 
 # Biomedical NER Models
 
-Three biomedical NER systems are evaluated in this project.
-
----
-
 ## SciSpacy
-
-Model:
-
-```
-
-en_ner_bc5cdr_md
-
-```
-
-SciSpacy is a biomedical NLP model trained to recognize **disease** and **chemical** entities.
-
-Characteristics:
+Model: `en_ner_bc5cdr_md`
 
 - Fast inference
-- Handles long clinical notes well
-- Often achieves high recall but lower precision
-
-SciSpacy is well suited for large clinical datasets due to its efficiency.
+- High recall
+- Lower precision
 
 ---
 
-## BioBERT
+## PubMedBERT
+Model: `BiomedNLP-PubMedBERT`
 
-Model:
-
-```
-
-Ishan0612/biobert-ner-disease-ncbi
-
-```
-
-BioBERT is a transformer-based biomedical language model pretrained on **PubMed biomedical literature**.
-
-Characteristics:
-
-- Context-aware entity recognition
-- Higher precision compared to rule-based models
-- Slower inference due to transformer computation
-
-BioBERT is particularly useful when contextual understanding of biomedical text is important.
+- Context-aware transformer model
+- Strong precision
+- Slow runtime
 
 ---
 
 ## ClinicalBERT
+Model: `bert-base-uncased_clinical-ner`
 
-Model:
-
-```
-
-samrawal/bert-base-uncased_clinical-ner
-
-```
-
-ClinicalBERT is a BERT variant trained specifically on **clinical narratives**.
-
-Characteristics:
-
-- Strong recall
-- Tends to over-predict entities
-- Requires preprocessing support for long clinical notes
-
-ClinicalBERT is designed for clinical environments where medical terminology appears frequently.
+- Designed for clinical text
+- High recall
+- Over-predicts entities
 
 ---
 
-# Candidate Gold Dataset Construction
+## BioELECTRA
+Model: `d4data/biomedical-ner-all`
 
-The dataset used in this project does not contain manual annotations.
+- Balanced performance
+- Good precision-recall trade-off
+- Efficient inference
 
-To enable model evaluation, a **candidate gold dataset** was created using **majority voting across models**.
+---
 
-### Process
+# Candidate Gold Dataset
 
-1. Load entity predictions from:
+Since real-world clinical datasets often lack labels, we simulate supervision using **model agreement**.
 
-- SciSpacy
-- BioBERT
-- ClinicalBERT
+### Method
 
-2. Clean ClinicalBERT output by removing `TEST` labels.
+- Combine predictions from 4 models:
+  - SciSpacy
+  - PubMedBERT
+  - ClinicalBERT
+  - BioELECTRA
 
-3. Construct a voting table using entity spans:
+- Build a voting table:
+(row_id, text, start_char, end_char, label)
 
-```
 
-(row_id, entity_text, start_char, end_char, label)
+- Accept entity if:
 
-```
 
-4. Accept entities predicted by **at least two models**.
+≥ 3 models agree
 
-The resulting dataset:
 
-```
+This produces:
+
 
 candidate_gold_entities.jsonl
 
-```
-
-This dataset serves as a **pseudo-gold standard** for benchmarking.
 
 ---
 
-# Benchmarking Method
+# Evaluation Method
 
-The benchmark measures how closely each model matches the candidate gold dataset.
+Evaluation follows standard biomedical NER practice:
 
-### Evaluation Steps
+### Steps
 
-1. Load clinical notes dataset
-2. Load entity predictions from each model
-3. Load candidate gold entities
-4. Group entities by `row_id`
-5. Convert entity spans into **BIO label sequences**
-6. Evaluate predictions using **seqeval**
+1. Load documents and entity predictions  
+2. Group by `row_id`  
+3. Convert spans → BIO labels  
+4. Evaluate using **seqeval**
 
 ---
 
-# BIO Label Conversion
+# BIO Conversion Example
 
-NER models output entities as **character spans**:
-
-```
-
-start_char
-end_char
-
-```
-
-For sequence evaluation, spans must be converted to **BIO token labels**.
-
-### Example
-
-Clinical text:
-
-```
-
+Text:
 The patient has asthma and takes aspirin
 
-```
 
-Tokenized form:
+Tokens:
 
-```
 
 ["The", "patient", "has", "asthma", "and", "takes", "aspirin"]
 
-```
 
-BIO labels:
+Labels:
 
-```
 
 ["O", "O", "O", "B-DISEASE", "O", "O", "B-CHEMICAL"]
 
-```
-
-This format allows standard sequence evaluation metrics to be applied.
 
 ---
 
-# Evaluation Metrics
+# Results
 
-The benchmark uses the **seqeval** library to compute standard NER evaluation metrics.
+## Candidate Gold vs Human Gold
 
-Metrics include:
+- Precision: **~0.99**
+- Recall: **~0.29**
+- F1-score: **~0.45**
 
-- Precision
-- Recall
-- F1-score
+### Interpretation
 
-These metrics provide a clear comparison between biomedical NER models.
-
----
-
-# Benchmark Results
-
-Example benchmark output:
-
-## SciSpacy
-
-Precision: **0.3679**
-
-Recall: **0.8152**
-
-F1-score: **0.5070**
+- Extremely high precision → candidate gold is **very reliable**
+- Low recall → many true entities are **missed**
+- This confirms:
+  > Majority voting produces **high-confidence but incomplete labels**
 
 ---
 
-## BioBERT
+## Model Performance (vs Candidate Gold)
 
-Precision: **0.4871**
-
-Recall: **0.6485**
-
-F1-score: **0.5563**
-
----
-
-## ClinicalBERT
-
-Precision: **0.1946**
-
-Recall: **0.8342**
-
-F1-score: **0.3155**
+| Model         | Precision | Recall | F1-score |
+|--------------|----------|--------|----------|
+| SciSpacy     | 0.32     | 0.99   | 0.48     |
+| PubMedBERT   | 0.15     | 0.81   | 0.25     |
+| ClinicalBERT | 0.22     | 0.88   | 0.35     |
+| BioELECTRA   | 0.31     | 0.81   | 0.45     |
 
 ---
 
-### Observations
+## Key Observations
 
-- **BioBERT achieved the highest overall F1-score**
-- **SciSpacy achieved strong recall but lower precision**
-- **ClinicalBERT produced many false positives**
-
-These results highlight the trade-off between **precision, recall, and computational efficiency** across biomedical NER systems.
-
----
-
-# Model Runtime Comparison
-
-Runtime performance was also measured during entity extraction.
-
-### SciSpacy
-
-Total time taken:
-
-```
-
-262.47 seconds
-
-```
-
-Average time per clinical note:
-
-```
-
-0.0529 seconds
-
-```
-
-SciSpacy is the fastest model and scales well to large clinical datasets.
+- **SciSpacy** → highest recall, lowest precision  
+- **PubMedBERT** → struggles with disease detection  
+- **ClinicalBERT** → over-predicts entities  
+- **BioELECTRA** → best balance overall  
 
 ---
 
-### BioBERT
+# Per-label Performance
 
-Average time per clinical note:
-
-```
-
-6.34 seconds
-
-```
-
-BioBERT provides strong contextual understanding but has slower inference due to transformer computations.
-
----
-
-### ClinicalBERT
-
-Total time taken:
-
-```
-
-1144.22 seconds
-
-```
-
-Average time per clinical note:
-
-```
-
-0.2186 seconds
-
-````
-
-ClinicalBERT falls between SciSpacy and BioBERT in runtime depending on preprocessing constraints.
+| Model | Label     | Precision | Recall | F1 |
+|------|----------|----------|--------|----|
+| SciSpacy | DISEASE | 0.2792 | 0.9843 | 0.4350 |
+| SciSpacy | CHEMICAL | 0.3555 | 0.9939 | 0.5237 |
+| PubMedBERT | DISEASE | 0.0595 | 0.5702 | 0.1078 |
+| PubMedBERT | CHEMICAL | 0.3590 | 0.9834 | 0.5260 |
+| ClinicalBERT | DISEASE | 0.1581 | 0.8622 | 0.2672 |
+| ClinicalBERT | CHEMICAL | 0.2917 | 0.8968 | 0.4402 |
+| BioELECTRA | DISEASE | 0.2482 | 0.8073 | 0.3797 |
+| BioELECTRA | CHEMICAL | 0.3829 | 0.8145 | 0.5209 |
 
 ---
 
 # Visual Results
 
-The following figures summarize model benchmarking performance, per-label F1-score, and runtime comparison.
+## Candidate Gold vs Human Gold
+![Candidate vs Human](figure/candidate_vs_human_performance.png)
 
-## Overall Model Performance
-![Overall model performance](figure/model_performance.png)
-
-## Per-label F1-score
-![Per-label F1-score](figure/per_label_f1.png)
+## Model Performance Comparison
+![Model Performance](figure/model_performance_comparison.png)
 
 ## Runtime Comparison
-![Runtime comparison](figure/runtime_comparison.png)
+![Runtime](figure/model_runtime_comparison.png)
 
-## Per-Label Performance Analysis
+## Per-label Performance
+![Per Label](figure/per_label_performance.png)
 
-To better understand model behaviour, performance was evaluated separately for each entity type (e.g., DISEASE and CHEMICAL).
+---
 
-This provides deeper insight beyond aggregate metrics and highlights differences in how models handle specific biomedical categories.
+# Confusion Matrices
 
-![Per Label Performance](figure/per_label_performance.png)
+## Candidate Gold vs Human Gold
+![CM Candidate](figure/confusion_matrix_candidate_vs_human.png)
+
+## SciSpacy
+![CM SciSpacy](figure/confusion_matrix_scispacy.png)
+
+## PubMedBERT
+![CM PubMedBERT](figure/confusion_matrix_pubmedbert.png)
+
+## ClinicalBERT
+![CM ClinicalBERT](figure/confusion_matrix_clinicalbert.png)
+
+## BioELECTRA
+![CM BioELECTRA](figure/confusion_matrix_bioelectra.png)
+
+---
+
+# Runtime Analysis
+
+| Model | Avg Time per Note |
+|------|------------------|
+| SciSpacy | 0.05s |
+| PubMedBERT | 6.34s |
+| ClinicalBERT | ~0.15s |
+| BioELECTRA | ~0.15s |
+
+### Insight
+
+- SciSpacy → fastest  
+- PubMedBERT → very slow  
+- Transformers → moderate  
+
+---
 
 # Running the Project
 
-Install dependencies:
+### Install
 
 ```bash
 pip install -r requirements/base.txt
-````
 
-Run the NER pipeline:
-
-Run the NER pipeline:
-
-```bash
 python -m src.pipeline
-
-python -m src.load_biobert
-
 python -m src.nerspacey
-
-python -m src.load_clinical_bert
-
+python -m src.biobert_bc5cdr
+python -m src.clinicalbert_bc5cdr
+python -m src.bioelectra_bc5cdr
 ```
-
-Run the benchmark:
-
-```bash
-python -m cadidate_gold 
-
-python -m src.benchmark
+Build candidate gold
 ```
-
-The benchmark script prints evaluation metrics for each model.
-
----
-
-# Repository Structure
+python -m src.candidate_gold_bc5cdr
+```
+Run evaluation
+```
+python -m src.evaluate_bc5cdr
 
 ```
 data/
-└── processed/
-    ├── cleaned_notes.csv
-    └── ner/
-        ├── candidate_gold_entities.jsonl
-        ├── scispacy/
-        │   └── scispacy_entities.jsonl
-        └── transformers/
-            ├── biobert/
-            │   └── biobert_entities.jsonl
-            └── clinicalbert/
-                └── clinicalbert_entities_clean.jsonl
+├── raw/bc5cdr/
+├── processed/bc5cdr/
+│   ├── docs.jsonl
+│   ├── gold_bio.jsonl
+│   ├── candidate_gold_entities.jsonl
+│   └── model outputs
 figure/
-├── model_performance.png
-├── per_label_f1.png
-└── runtime_comparison.png
 src/
-├── pipeline.py
-├── benchmark.py
-├── load_biobert.py
-├── nerspacey.py
-├── load_clinical_bert.py
-
-
+├── graph.py
+├── evaluate_bc5cdr.py
+├── candidate_gold_bc5cdr.py
+├── ner pipelines
 docs/
-└── Biomedical_NER_Clinical_Notes.pdf
-```
 
----
+Future Work
+Entity normalization (UMLS / SNOMED)
+Knowledge graph construction
+Graph neural networks for reasoning
+Multimodal biomedical learning
+Clinical decision support systems
+Research Impact
 
-# Research Documentation
+This project demonstrates:
 
-A research report describing the biomedical NER experiments is included in the repository:
+How to build pseudo-label datasets
+Trade-offs between precision vs recall
+Practical challenges in biomedical NER benchmarking
 
-```
-docs/Biomedical_NER_Clinical_Notes.pdf
-```
+It forms a strong foundation for:
 
-The document summarizes:
-
-* clinical text preprocessing
-* biomedical NER pipeline design
-* experimental setup
-* model comparison results
-
-This document represents the **initial research report for the project** and forms the basis for potential journal publication.
-
----
-
-# Future Work
-
-Future extensions of this project include:
-
-* Entity normalization to biomedical ontologies
-* Clinical knowledge graph construction
-* Graph-based reasoning over medical relationships
-* Spatial modeling of anatomical relationships
-* Comorbidity prediction using graph learning
-
-These steps will enable more advanced applications such as **clinical decision support and medical knowledge discovery**.
-
----
-
-# Project Status
-
-This repository currently focuses on:
-
-* Biomedical Named Entity Recognition
-* Model comparison and benchmarking
-* Candidate gold dataset construction
-
-The next phase of the project will extend the pipeline toward **clinical knowledge graph generation and graph-based healthcare analytics**.
-
-
-
-
+Biomedical NLP research + clinical knowledge graph systems
