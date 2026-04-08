@@ -28,6 +28,7 @@ This repository implements a **reproducible biomedical NLP pipeline** that:
 ---
 
 # Project Pipeline
+
 Raw Clinical Notes / BC5CDR Dataset
 ↓
 Text Processing
@@ -256,10 +257,10 @@ Labels:
 
 | Model | Avg Time per Note |
 |------|------------------|
-| SciSpacy | 0.05s |
-| PubMedBERT | 6.34s |
-| ClinicalBERT | ~0.15s |
-| BioELECTRA | ~0.15s |
+| SciSpacy | 0.0238s |
+| PubMedBERT | 2.7074s |
+| ClinicalBERT | 0.1502s |
+| BioELECTRA | 0.1324s |
 
 ### Insight
 
@@ -291,6 +292,7 @@ Run evaluation
 python -m src.evaluate_bc5cdr
 
 ```
+
 
 data/
 ├── raw/bc5cdr/
