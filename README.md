@@ -294,6 +294,7 @@ python -m src.evaluate_bc5cdr
 ```
 ## Project Structure
 
+```
 data/
 ├── raw/
 │   └── bc5cdr/
@@ -311,15 +312,15 @@ src/
 ├── evaluate_bc5cdr.py
 ├── candidate_gold_bc5cdr.py
 ├── ner_pipelines/
-docs/
+```
 
-Future Work
-Entity normalization (UMLS / SNOMED)
-Knowledge graph construction
-Graph neural networks for reasoning
-Multimodal biomedical learning
-Clinical decision support systems
-Research Impact
+## Future Work
+
+* Entity normalization (UMLS / SNOMED)
+* Knowledge graph construction
+* Graph neural networks for reasoning
+* Multimodal learning
+
 
 This project demonstrates:
 
