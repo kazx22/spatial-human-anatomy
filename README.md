@@ -295,18 +295,22 @@ python -m src.evaluate_bc5cdr
 
 
 data/
-├── raw/bc5cdr/
-├── processed/bc5cdr/
-│   ├── docs.jsonl
-│   ├── gold_bio.jsonl
-│   ├── candidate_gold_entities.jsonl
-│   └── model outputs
+├── raw/
+│   └── bc5cdr/
+├── processed/
+│   └── bc5cdr/
+│       ├── docs.jsonl
+│       ├── gold_bio.jsonl
+│       ├── candidate_gold_entities.jsonl
+│       └── model_outputs/
+
 figure/
+
 src/
 ├── graph.py
 ├── evaluate_bc5cdr.py
 ├── candidate_gold_bc5cdr.py
-├── ner pipelines
+├── ner_pipelines/
 docs/
 
 Future Work
