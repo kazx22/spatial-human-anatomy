@@ -1,10 +1,11 @@
 import json
 import time
 from pathlib import Path
-
 from transformers import pipeline
 
-DISEASE_MODEL = "alvaroalon2/biobert_diseases_ner"
+DISEASE_MODEL = (
+    "sarahmiller137/BiomedNLP-PubMedBERT-base-uncased-abstract-fulltext-ft-ncbi-disease"
+)
 CHEMICAL_MODEL = "OpenMed/OpenMed-NER-ChemicalDetect-PubMed-335M"
 
 
@@ -56,17 +57,14 @@ def predictions_to_entities(predictions, row_id, label_name):
             "text": pred["word"],
             "start_char": int(pred["start"]),
             "end_char": int(pred["end"]),
-            "label": normalize_label(
-                pred.get("entity_group", pred.get("entity", label_name)),
-                label_name,
-            ),
+            "label": normalize_label(pred.get("entity_group", label_name), label_name),
         }
         entities.append(entity)
 
     return entities
 
 
-def run_biobert(docs, max_chars=1500):
+def run_pubmedbert(docs, max_chars=1500):
     disease_ner = pipeline(
         "token-classification",
         model=DISEASE_MODEL,
@@ -87,7 +85,8 @@ def run_biobert(docs, max_chars=1500):
 
     for i, doc_record in enumerate(docs):
         row_id = doc_record["row_id"]
-        text = safe_text(doc_record["full_text"], max_chars=max_chars)
+        text = doc_record["full_text"]
+        text = safe_text(text, max_chars=max_chars)
 
         disease_preds = disease_ner(text)
         chemical_preds = chemical_ner(text)
@@ -112,21 +111,21 @@ def run_biobert(docs, max_chars=1500):
 
 if __name__ == "__main__":
     input_file = Path("data/processed/bc5cdr/bc5cdr_train_docs.jsonl")
-    output_file = Path("data/processed/bc5cdr/biobert_train_entities_bc5cdr.jsonl")
+    output_file = Path("data/processed/bc5cdr/pubmedbert_train_entities_bc5cdr.jsonl")
 
     print("Loading BC5CDR train docs...")
     docs = load_jsonl(input_file)
     print(f"Loaded {len(docs)} documents")
 
-    print("Running BioBERT + chemical models...")
-    entities = run_biobert(docs, max_chars=1500)
+    print("Running PubMedBERT models...")
+    entities = run_pubmedbert(docs, max_chars=1500)
 
     print(f"Predicted {len(entities)} entities")
     save_jsonl(entities, output_file)
 
-    print(f"Saved BioBERT entities to {output_file}")
+    print(f"Saved PubMedBERT entities to {output_file}")
 
 
-# Total time taken: 2206.49 seconds
-# Average time per document: 4.4130 seconds
-# Predicted 15963 entities
+# Total time taken: 1353.70 seconds
+# Average time per document: 2.7074 seconds
+# Predicted 15807 entities

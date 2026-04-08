@@ -29,29 +29,68 @@ def print_per_label_summary(report_dict):
             )
 
 
-def evaluate_model(notes, gold_by_row, pred_by_row, model_name, runtime):
+def evaluate_model_against_human_gold(
+    notes,
+    gold_bio_map,
+    pred_by_row,
+    model_name,
+    runtime,
+):
     y_true = []
     y_pred = []
 
+    total_docs = 0
+    used_docs = 0
+    skipped_missing_gold = 0
+    skipped_token_mismatch = 0
+
     for row_id, text in notes.items():
-        gold_entities = gold_by_row.get(row_id, [])
+        total_docs += 1
+
+        gold_record = gold_bio_map.get(row_id)
         pred_entities = pred_by_row.get(row_id, [])
 
-        gold_tokens, gold_labels = span_to_bio(text, gold_entities)
+        if gold_record is None:
+            print(f"[WARNING] Missing human gold BIO for row_id {row_id}")
+            skipped_missing_gold += 1
+            continue
+
+        gold_tokens = gold_record["tokens"]
+        gold_labels = gold_record["bio_labels"]
+
         pred_tokens, pred_labels = span_to_bio(text, pred_entities)
 
-        if gold_tokens != pred_tokens:
+        if pred_tokens != gold_tokens:
             print(f"[WARNING] Token mismatch at row_id {row_id} for {model_name}")
+            skipped_token_mismatch += 1
+            continue
+
+        if len(pred_labels) != len(gold_labels):
+            print(
+                f"[WARNING] Label length mismatch at row_id {row_id} for {model_name}"
+            )
+            skipped_token_mismatch += 1
             continue
 
         y_true.append(gold_labels)
         y_pred.append(pred_labels)
+        used_docs += 1
+
+    print(f"\n{model_name} evaluation summary")
+    print(f"Total docs:               {total_docs}")
+    print(f"Used docs:                {used_docs}")
+    print(f"Skipped missing gold:     {skipped_missing_gold}")
+    print(f"Skipped token mismatches: {skipped_token_mismatch}")
+
+    if not y_true or not y_pred:
+        print(f"[ERROR] No valid evaluation rows for {model_name}")
+        return
 
     precision = precision_score(y_true, y_pred)
     recall = recall_score(y_true, y_pred)
     f1 = f1_score(y_true, y_pred)
 
-    print(f"\n{model_name}")
+    print(f"\n{model_name} vs Human Gold")
     print(f"Precision: {precision:.4f}")
     print(f"Recall:    {recall:.4f}")
     print(f"F1-score:  {f1:.4f}")
@@ -81,31 +120,61 @@ def evaluate_model(notes, gold_by_row, pred_by_row, model_name, runtime):
     )
 
 
-def evaluate_candidate_vs_human(notes, gold_bio_map, candidate_by_row, runtime=0.0):
+def evaluate_candidate_vs_human(
+    notes,
+    gold_bio_map,
+    candidate_by_row,
+    runtime=0.0,
+):
     y_true = []
     y_pred = []
 
+    total_docs = 0
+    used_docs = 0
+    skipped_missing_gold = 0
+    skipped_token_mismatch = 0
+
     for row_id, text in notes.items():
-        gold_labels = gold_bio_map.get(row_id)
+        total_docs += 1
+
+        gold_record = gold_bio_map.get(row_id)
         candidate_entities = candidate_by_row.get(row_id, [])
 
-        if gold_labels is None:
+        if gold_record is None:
             print(f"[WARNING] Missing human gold BIO for row_id {row_id}")
+            skipped_missing_gold += 1
             continue
+
+        gold_tokens = gold_record["tokens"]
+        gold_labels = gold_record["bio_labels"]
 
         pred_tokens, pred_labels = span_to_bio(text, candidate_entities)
-        gold_tokens = text.split()
 
-        if len(gold_tokens) != len(gold_labels):
-            print(f"[WARNING] Gold token/label mismatch at row_id {row_id}")
+        if pred_tokens != gold_tokens:
+            print(f"[WARNING] Token mismatch at row_id {row_id} for candidate gold")
+            skipped_token_mismatch += 1
             continue
 
-        if len(pred_tokens) != len(gold_labels):
-            print(f"[WARNING] Prediction token/label mismatch at row_id {row_id}")
+        if len(pred_labels) != len(gold_labels):
+            print(
+                f"[WARNING] Label length mismatch at row_id {row_id} for candidate gold"
+            )
+            skipped_token_mismatch += 1
             continue
 
         y_true.append(gold_labels)
         y_pred.append(pred_labels)
+        used_docs += 1
+
+    print("\nCandidate Gold vs Human Gold evaluation summary")
+    print(f"Total docs:               {total_docs}")
+    print(f"Used docs:                {used_docs}")
+    print(f"Skipped missing gold:     {skipped_missing_gold}")
+    print(f"Skipped token mismatches: {skipped_token_mismatch}")
+
+    if not y_true or not y_pred:
+        print("[ERROR] No valid evaluation rows for candidate gold vs human gold")
+        return
 
     precision = precision_score(y_true, y_pred)
     recall = recall_score(y_true, y_pred)
@@ -173,7 +242,7 @@ def main():
 
     gold_bio_map = {}
     for record in human_gold_bio:
-        gold_bio_map[record["row_id"]] = record["bio_labels"]
+        gold_bio_map[record["row_id"]] = record
 
     candidate_by_row = group_by_row(candidate_gold_entities)
     scispacy_by_row = group_by_row(scispacy_entities)
@@ -188,33 +257,33 @@ def main():
         runtime=0.0,
     )
 
-    evaluate_model(
+    evaluate_model_against_human_gold(
         notes,
-        candidate_by_row,
+        gold_bio_map,
         scispacy_by_row,
         "SciSpacy",
         runtime=0.0238,
     )
 
-    evaluate_model(
+    evaluate_model_against_human_gold(
         notes,
-        candidate_by_row,
+        gold_bio_map,
         pubmedbert_by_row,
         "PubMedBERT",
         runtime=2.7074,
     )
 
-    evaluate_model(
+    evaluate_model_against_human_gold(
         notes,
-        candidate_by_row,
+        gold_bio_map,
         clinicalbert_by_row,
         "ClinicalBERT",
         runtime=0.1502,
     )
 
-    evaluate_model(
+    evaluate_model_against_human_gold(
         notes,
-        candidate_by_row,
+        gold_bio_map,
         bioelectra_by_row,
         "BioELECTRA",
         runtime=0.1324,
