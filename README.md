@@ -292,7 +292,7 @@ Run evaluation
 python -m src.evaluate_bc5cdr
 
 ```
-
+## Project Structure
 
 data/
 ├── raw/
