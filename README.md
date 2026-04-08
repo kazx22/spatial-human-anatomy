@@ -28,7 +28,7 @@ This repository implements a **reproducible biomedical NLP pipeline** that:
 ---
 
 # Project Pipeline
-
+```
 Raw Clinical Notes / BC5CDR Dataset
 ↓
 Text Processing
@@ -48,7 +48,7 @@ BIO Conversion
 Benchmark Evaluation (seqeval)
 ↓
 Structured Biomedical Entities
-
+```
 ---
 
 # Dataset
