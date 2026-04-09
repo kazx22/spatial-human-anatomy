@@ -90,3 +90,15 @@ def build_gold_bio(docs, grouped_entities):
         gold_data.append(record)
 
     return gold_data
+
+
+def remove_TEST(input_file: str, output_file: str):
+    with open(input_file, "r", encoding="utf-8") as infile, open(
+        output_file, "w", encoding="utf-8"
+    ) as outfile:
+
+        for line in infile:
+            entity = json.loads(line)
+
+            if entity["label"] != "TEST":
+                outfile.write(json.dumps(entity) + "\n")
