@@ -28,6 +28,7 @@ This repository implements a **reproducible biomedical NLP pipeline** that:
 ---
 
 # Project Pipeline
+```
 Raw Clinical Notes / BC5CDR Dataset
 ↓
 Text Processing
@@ -47,7 +48,7 @@ BIO Conversion
 Benchmark Evaluation (seqeval)
 ↓
 Structured Biomedical Entities
-
+```
 ---
 
 # Dataset
@@ -256,10 +257,10 @@ Labels:
 
 | Model | Avg Time per Note |
 |------|------------------|
-| SciSpacy | 0.05s |
-| PubMedBERT | 6.34s |
-| ClinicalBERT | ~0.15s |
-| BioELECTRA | ~0.15s |
+| SciSpacy | 0.0238s |
+| PubMedBERT | 2.7074s |
+| ClinicalBERT | 0.1502s |
+| BioELECTRA | 0.1324s |
 
 ### Insight
 
@@ -291,29 +292,35 @@ Run evaluation
 python -m src.evaluate_bc5cdr
 
 ```
+## Project Structure
 
+```
 data/
-├── raw/bc5cdr/
-├── processed/bc5cdr/
-│   ├── docs.jsonl
-│   ├── gold_bio.jsonl
-│   ├── candidate_gold_entities.jsonl
-│   └── model outputs
+├── raw/
+│   └── bc5cdr/
+├── processed/
+│   └── bc5cdr/
+│       ├── docs.jsonl
+│       ├── gold_bio.jsonl
+│       ├── candidate_gold_entities.jsonl
+│       └── model_outputs/
+
 figure/
+
 src/
 ├── graph.py
 ├── evaluate_bc5cdr.py
 ├── candidate_gold_bc5cdr.py
-├── ner pipelines
-docs/
+├── ner_pipelines/
+```
 
-Future Work
-Entity normalization (UMLS / SNOMED)
-Knowledge graph construction
-Graph neural networks for reasoning
-Multimodal biomedical learning
-Clinical decision support systems
-Research Impact
+## Future Work
+
+* Entity normalization (UMLS / SNOMED)
+* Knowledge graph construction
+* Graph neural networks for reasoning
+* Multimodal learning
+
 
 This project demonstrates:
 
