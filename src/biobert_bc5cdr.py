@@ -5,7 +5,7 @@ from pathlib import Path
 from transformers import pipeline
 
 DISEASE_MODEL = "alvaroalon2/biobert_diseases_ner"
-CHEMICAL_MODEL = "OpenMed/OpenMed-NER-ChemicalDetect-PubMed-335M"
+CHEMICAL_MODEL = "alvaroalon2/biobert_chemical_ner"
 
 MAX_TOKENS = 400
 OVERLAP_SENTS = 1
@@ -70,7 +70,7 @@ def chunk_text(text, tokenizer, max_tokens=MAX_TOKENS, overlap_sents=OVERLAP_SEN
             sent = raw_sentences[j]
             sent_token_count = len(tokenizer.encode(sent, add_special_tokens=False))
 
-            # +2 for [CLS] and [SEP]
+            
             if token_count + sent_token_count + 2 > max_tokens and chunk_sents:
                 break
 
@@ -190,6 +190,6 @@ if __name__ == "__main__":
     print(f"Saved BioBERT entities to {output_file}")
 
 
-# Total time taken: 2009.06 seconds
-# Average time per document: 4.0181 seconds
-# Predicted 18477 entitiesk
+# Total time taken: 231.70 seconds
+# Average time per document: 0.4634 seconds
+# Predicted 18595 entities

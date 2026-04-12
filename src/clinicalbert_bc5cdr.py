@@ -162,6 +162,6 @@ if __name__ == "__main__":
     print(f"Saved ClinicalBERT entities to {output_file}")
 
 
-# Total time taken: 127.29 seconds
-# Average time per document: 0.2546 seconds
-# Predicted 18972 entities
+# Total time taken: 105.34 seconds
+# Average time per document: 0.2107 seconds
+# Predicted 20742 entities

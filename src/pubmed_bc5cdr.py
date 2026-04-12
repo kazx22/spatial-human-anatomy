@@ -192,6 +192,6 @@ if __name__ == "__main__":
     print(f"Saved PubMedBERT entities to {output_file}")
 
 
-# Total time taken: 1970.44 seconds
-# Average time per document: 3.9409 seconds
-# Predicted 18153 entities
+# Total time taken: 1738.89 seconds
+# Average time per document: 3.4778 seconds
+# Predicted 20039 entities

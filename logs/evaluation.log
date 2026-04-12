@@ -1,0 +1,276 @@
+
+============================================================
+CANDIDATE GOLD VS HUMAN GOLD
+============================================================
+
+Candidate Gold vs Human Gold evaluation summary
+Total docs:               500
+Used docs:                500
+Skipped missing gold:     0
+Skipped token mismatches: 0
+
+Candidate Gold vs Human Gold
+Precision: 0.9308
+Recall:    0.5397
+F1-score:  0.6832
+              precision    recall  f1-score   support
+
+    CHEMICAL     0.9292    0.5268    0.6724      5135
+     DISEASE     0.9325    0.5555    0.6963      4180
+
+   micro avg     0.9308    0.5397    0.6832      9315
+   macro avg     0.9309    0.5411    0.6843      9315
+weighted avg     0.9307    0.5397    0.6831      9315
+
+
+Per-label performance:
+DISEASE    Precision: 0.9325  Recall: 0.5555  F1: 0.6963  Support: 4180
+CHEMICAL   Precision: 0.9292  Recall: 0.5268  F1: 0.6724  Support: 5135
+
+============================================================
+MODELS VS HUMAN GOLD
+============================================================
+
+SciSpacy evaluation summary vs Human Gold
+Total docs:               500
+Used docs:                500
+Skipped missing gold:     0
+Skipped token mismatches: 0
+
+SciSpacy vs Human Gold
+Precision: 0.9334
+Recall:    0.8613
+F1-score:  0.8959
+              precision    recall  f1-score   support
+
+    CHEMICAL     0.9374    0.8308    0.8809      5135
+     DISEASE     0.9290    0.8988    0.9137      4180
+
+   micro avg     0.9334    0.8613    0.8959      9315
+   macro avg     0.9332    0.8648    0.8973      9315
+weighted avg     0.9336    0.8613    0.8956      9315
+
+
+Per-label performance:
+DISEASE    Precision: 0.9290  Recall: 0.8988  F1: 0.9137  Support: 4180
+CHEMICAL   Precision: 0.9374  Recall: 0.8308  F1: 0.8809  Support: 5135
+
+BioBERT evaluation summary vs Human Gold
+Total docs:               500
+Used docs:                500
+Skipped missing gold:     0
+Skipped token mismatches: 0
+
+BioBERT vs Human Gold
+Precision: 0.3474
+Recall:    0.6485
+F1-score:  0.4525
+              precision    recall  f1-score   support
+
+    CHEMICAL     0.7521    0.7468    0.7495      5135
+     DISEASE     0.1795    0.5278    0.2679      4180
+
+   micro avg     0.3474    0.6485    0.4525      9315
+   macro avg     0.4658    0.6373    0.5087      9315
+weighted avg     0.4952    0.6485    0.5334      9315
+
+
+Per-label performance:
+DISEASE    Precision: 0.1795  Recall: 0.5278  F1: 0.2679  Support: 4180
+CHEMICAL   Precision: 0.7521  Recall: 0.7468  F1: 0.7495  Support: 5135
+
+PubMedBERT evaluation summary vs Human Gold
+Total docs:               500
+Used docs:                500
+Skipped missing gold:     0
+Skipped token mismatches: 0
+
+PubMedBERT vs Human Gold
+Precision: 0.3057
+Recall:    0.5842
+F1-score:  0.4014
+              precision    recall  f1-score   support
+
+    CHEMICAL     0.8202    0.8530    0.8363      5135
+     DISEASE     0.0852    0.2541    0.1276      4180
+
+   micro avg     0.3057    0.5842    0.4014      9315
+   macro avg     0.4527    0.5535    0.4820      9315
+weighted avg     0.4904    0.5842    0.5183      9315
+
+
+Per-label performance:
+DISEASE    Precision: 0.0852  Recall: 0.2541  F1: 0.1276  Support: 4180
+CHEMICAL   Precision: 0.8202  Recall: 0.8530  F1: 0.8363  Support: 5135
+
+ClinicalBERT evaluation summary vs Human Gold
+Total docs:               500
+Used docs:                500
+Skipped missing gold:     0
+Skipped token mismatches: 0
+
+ClinicalBERT vs Human Gold
+Precision: 0.2987
+Recall:    0.4247
+F1-score:  0.3507
+              precision    recall  f1-score   support
+
+    CHEMICAL     0.3654    0.4189    0.3903      5135
+     DISEASE     0.2454    0.4318    0.3129      4180
+
+   micro avg     0.2987    0.4247    0.3507      9315
+   macro avg     0.3054    0.4254    0.3516      9315
+weighted avg     0.3115    0.4247    0.3556      9315
+
+
+Per-label performance:
+DISEASE    Precision: 0.2454  Recall: 0.4318  F1: 0.3129  Support: 4180
+CHEMICAL   Precision: 0.3654  Recall: 0.4189  F1: 0.3903  Support: 5135
+
+BioELECTRA evaluation summary vs Human Gold
+Total docs:               500
+Used docs:                500
+Skipped missing gold:     0
+Skipped token mismatches: 0
+
+BioELECTRA vs Human Gold
+Precision: 0.4855
+Recall:    0.4448
+F1-score:  0.4642
+              precision    recall  f1-score   support
+
+    CHEMICAL     0.5945    0.4800    0.5312      5135
+     DISEASE     0.3824    0.4014    0.3917      4180
+
+   micro avg     0.4855    0.4448    0.4642      9315
+   macro avg     0.4885    0.4407    0.4614      9315
+weighted avg     0.4994    0.4448    0.4686      9315
+
+
+Per-label performance:
+DISEASE    Precision: 0.3824  Recall: 0.4014  F1: 0.3917  Support: 4180
+CHEMICAL   Precision: 0.5945  Recall: 0.4800  F1: 0.5312  Support: 5135
+
+============================================================
+MODELS VS CANDIDATE GOLD
+============================================================
+
+SciSpacy evaluation summary vs Candidate Gold
+Total docs:               500
+Used docs:                500
+Skipped missing gold:     0
+Skipped token mismatches: 0
+
+SciSpacy vs Candidate Gold
+Precision: 0.5761
+Recall:    0.9169
+F1-score:  0.7076
+              precision    recall  f1-score   support
+
+    CHEMICAL     0.5827    0.9110    0.7108      2911
+     DISEASE     0.5687    0.9237    0.7040      2490
+
+   micro avg     0.5761    0.9169    0.7076      5401
+   macro avg     0.5757    0.9174    0.7074      5401
+weighted avg     0.5763    0.9169    0.7077      5401
+
+
+Per-label performance:
+DISEASE    Precision: 0.5687  Recall: 0.9237  F1: 0.7040  Support: 2490
+CHEMICAL   Precision: 0.5827  Recall: 0.9110  F1: 0.7108  Support: 2911
+
+BioBERT evaluation summary vs Candidate Gold
+Total docs:               500
+Used docs:                500
+Skipped missing gold:     0
+Skipped token mismatches: 0
+
+BioBERT vs Candidate Gold
+Precision: 0.2376
+Recall:    0.7650
+F1-score:  0.3626
+              precision    recall  f1-score   support
+
+    CHEMICAL     0.5238    0.9176    0.6669      2911
+     DISEASE     0.1189    0.5867    0.1977      2490
+
+   micro avg     0.2376    0.7650    0.3626      5401
+   macro avg     0.3214    0.7522    0.4323      5401
+weighted avg     0.3371    0.7650    0.4506      5401
+
+
+Per-label performance:
+DISEASE    Precision: 0.1189  Recall: 0.5867  F1: 0.1977  Support: 2490
+CHEMICAL   Precision: 0.5238  Recall: 0.9176  F1: 0.6669  Support: 2911
+
+PubMedBERT evaluation summary vs Candidate Gold
+Total docs:               500
+Used docs:                500
+Skipped missing gold:     0
+Skipped token mismatches: 0
+
+PubMedBERT vs Candidate Gold
+Precision: 0.2051
+Recall:    0.6760
+F1-score:  0.3147
+              precision    recall  f1-score   support
+
+    CHEMICAL     0.5210    0.9557    0.6743      2911
+     DISEASE     0.0697    0.3490    0.1163      2490
+
+   micro avg     0.2051    0.6760    0.3147      5401
+   macro avg     0.2954    0.6523    0.3953      5401
+weighted avg     0.3129    0.6760    0.4170      5401
+
+
+Per-label performance:
+DISEASE    Precision: 0.0697  Recall: 0.3490  F1: 0.1163  Support: 2490
+CHEMICAL   Precision: 0.5210  Recall: 0.9557  F1: 0.6743  Support: 2911
+
+ClinicalBERT evaluation summary vs Candidate Gold
+Total docs:               500
+Used docs:                500
+Skipped missing gold:     0
+Skipped token mismatches: 0
+
+ClinicalBERT vs Candidate Gold
+Precision: 0.2646
+Recall:    0.6488
+F1-score:  0.3759
+              precision    recall  f1-score   support
+
+    CHEMICAL     0.3109    0.6286    0.4160      2911
+     DISEASE     0.2276    0.6723    0.3400      2490
+
+   micro avg     0.2646    0.6488    0.3759      5401
+   macro avg     0.2692    0.6505    0.3780      5401
+weighted avg     0.2725    0.6488    0.3810      5401
+
+
+Per-label performance:
+DISEASE    Precision: 0.2276  Recall: 0.6723  F1: 0.3400  Support: 2490
+CHEMICAL   Precision: 0.3109  Recall: 0.6286  F1: 0.4160  Support: 2911
+
+BioELECTRA evaluation summary vs Candidate Gold
+Total docs:               500
+Used docs:                500
+Skipped missing gold:     0
+Skipped token mismatches: 0
+
+BioELECTRA vs Candidate Gold
+Precision: 0.3832
+Recall:    0.6054
+F1-score:  0.4693
+              precision    recall  f1-score   support
+
+    CHEMICAL     0.4597    0.6548    0.5402      2911
+     DISEASE     0.3108    0.5478    0.3966      2490
+
+   micro avg     0.3832    0.6054    0.4693      5401
+   macro avg     0.3853    0.6013    0.4684      5401
+weighted avg     0.3911    0.6054    0.4740      5401
+
+
+Per-label performance:
+DISEASE    Precision: 0.3108  Recall: 0.5478  F1: 0.3966  Support: 2490
+CHEMICAL   Precision: 0.4597  Recall: 0.6548  F1: 0.5402  Support: 2911

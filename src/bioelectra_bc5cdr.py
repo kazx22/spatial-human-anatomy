@@ -166,6 +166,6 @@ if __name__ == "__main__":
     print(f"Saved BioELECTRA entities to {output_file}")
 
 
-# Total time taken: 64.94 seconds
-# Average time per document: 0.1299 seconds
-# Predicted 11473 entities
+# Total time taken: 63.33 seconds
+# Average time per document: 0.1267 seconds
+# Predicted 12198 entities

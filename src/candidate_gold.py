@@ -39,6 +39,7 @@ def entity_key(entity: dict):
 
 def build_candidate_gold(
     scif,
+    biobertf,
     pubmedf,
     clinicf,
     bioelectraf,
@@ -52,11 +53,13 @@ def build_candidate_gold(
     pubmed_entities = load_jsonl(pubmedf)
     clinic_entities = load_jsonl(clinicf)
     bioelectra_entities = load_jsonl(bioelectraf)
+    biobert_entities = load_jsonl(biobertf)
 
-    print(f"SciSpacy:   {len(sci_entities)}")
-    print(f"PubMedBERT: {len(pubmed_entities)}")
+    print(f"SciSpacy:     {len(sci_entities)}")
+    print(f"BioBERT:      {len(biobert_entities)}")
+    print(f"PubMedBERT:   {len(pubmed_entities)}")
     print(f"ClinicalBERT: {len(clinic_entities)}")
-    print(f"BioELECTRA: {len(bioelectra_entities)}")
+    print(f"BioELECTRA:   {len(bioelectra_entities)}")
 
     for entity in sci_entities:
         key = entity_key(entity)
@@ -82,6 +85,11 @@ def build_candidate_gold(
         if key not in entity_store:
             entity_store[key] = entity
 
+    for entity in biobert_entities:
+        key = entity_key(entity)
+        vote_table[key].append("biobert")
+        if key not in entity_store:
+            entity_store[key] = entity
     output_path = Path(output_file)
     output_path.parent.mkdir(parents=True, exist_ok=True)
 
@@ -116,6 +124,7 @@ if __name__ == "__main__":
 
     build_candidate_gold(
         "data/processed/bc5cdr/scispacy_train_entities_bc5cdr.jsonl",
+        "data/processed/bc5cdr/biobert_train_entities_bc5cdr.jsonl",
         "data/processed/bc5cdr/pubmedbert_train_entities_bc5cdr.jsonl",
         "data/processed/bc5cdr/clinicalbert_train_entities_bc5cdr_clean.jsonl",
         "data/processed/bc5cdr/bioelectra_train_entities_bc5cdr.jsonl",
