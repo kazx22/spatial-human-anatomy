@@ -549,9 +549,7 @@ Planned extensions include:
 ---
 
 # License
-
-This repository is intended for academic and research use. Add your preferred software license here if needed.
-
+This project is licensed under the MIT License. See [LICENSE](LICENSE) for details.
 ---
 
 # Repository
