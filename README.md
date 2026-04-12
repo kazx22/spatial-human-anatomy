@@ -174,7 +174,6 @@ Additional gold directory file present in the project:
 data/
 ├── gold/
 │   ├── bc5cdr_train_gold_bio.jsonl
-│   ├── candidate_gold_entities.jsonl
 │   └── candidate_gold_train_entities_bc5cdr.jsonl
 ├── processed/
 │   └── bc5cdr/
