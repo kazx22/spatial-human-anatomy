@@ -1,105 +1,89 @@
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.18928352.svg)](https://doi.org/10.5281/zenodo.18928352)
 
-# Spatial Human Anatomy — Biomedical NER Benchmarking with Human Gold and Pseudo-Gold
+# Spatial Human Anatomy — Biomedical NER Benchmarking on BC5CDR
 
-This repository presents a **biomedical named entity recognition (NER) benchmarking study** using the **BC5CDR** dataset. The project focuses on extraction of **DISEASE** and **CHEMICAL** entities and evaluates several NER systems against both:
+This repository presents a **reproducible biomedical named entity recognition (NER) benchmarking study** using the **BC5CDR** corpus. Five NER systems are evaluated on extraction of **DISEASE** and **CHEMICAL** entities against two reference standards:
 
-- **human gold annotations**
-- **pseudo-gold annotations** constructed via multi-model agreement
+- **human gold annotations** derived directly from BC5CDR
+- **pseudo-gold annotations** constructed via multi-model majority voting
 
-The work is designed as a reproducible foundation for later research in **clinical knowledge graph construction**, **structured biomedical information extraction**, and **clinical AI**.
+The work forms a reproducible foundation for future research in **clinical knowledge graph construction**, **structured biomedical information extraction**, and **clinical AI**.
 
 ---
 
 # Overview
 
-Clinical and biomedical narratives contain valuable information, but that information is typically stored as unstructured text. A core step in turning such text into usable clinical knowledge is identifying entities such as diseases and chemicals. This repository implements an end-to-end pipeline for:
+Biomedical narratives contain large amounts of clinical knowledge stored as unstructured text. Identifying entities such as diseases and chemicals is a critical first step toward structured knowledge extraction. This repository implements an end-to-end pipeline covering:
 
-- parsing the BC5CDR corpus
-- building **human gold BIO labels**
-- running multiple NER systems
-- constructing **pseudo-gold annotations** through majority voting
-- benchmarking models with **seqeval**
+- parsing the BC5CDR corpus into document and entity JSONL files
+- building **human gold BIO labels** from expert annotations
+- running five NER systems with proper long-document chunking
+- constructing **pseudo-gold annotations** through majority voting (≥ 3 of 5 models)
+- benchmarking all models with **seqeval** against both reference standards
 - generating performance plots, per-label tables, confusion matrices, and runtime figures
 
 ---
 
 # Research Contributions
 
-This repository provides:
-
-- an end-to-end biomedical NER pipeline
-- benchmarking across **five NER systems**
-- comparison against **human gold** and **pseudo-gold**
-- BIO conversion and evaluation with **seqeval**
-- per-label analysis for **DISEASE** and **CHEMICAL**
-- confusion matrix analysis
-- runtime benchmarking
-- reproducible scripts and logged outputs
+- end-to-end biomedical NER pipeline evaluated on a standard benchmark
+- comparison of **five NER systems** spanning rule-based, transformer, and clinical models
+- dual evaluation against **human gold** and **pseudo-gold** reference standards
+- analysis of pseudo-gold quality against human annotations (P: 0.93, R: 0.54, F1: 0.68)
+- per-label breakdown for **DISEASE** and **CHEMICAL** entity types
+- confusion matrix analysis and runtime benchmarking across all models
 
 ---
 
 # Dataset
 
-## BC5CDR
+This study uses the **BC5CDR (BioCreative V Chemical-Disease Relation)** corpus, a widely used biomedical NER benchmark with expert-annotated DISEASE and CHEMICAL entities across 1,500 PubMed abstracts with train, development, and test splits.
 
-This study uses the **BC5CDR (BioCreative V Chemical-Disease Relation)** dataset, a widely used biomedical benchmark containing expert-annotated:
+**Citation:**
 
-- **DISEASE** entities
-- **CHEMICAL** entities
+> Li, J., Sun, Y., Johnson, R. J., Sciaky, D., Wei, C. H., Leaman, R., ... & Lu, Z. (2016). BioCreative V CDR task corpus: a resource for chemical disease relation extraction. *Database*, 2016.
 
-BC5CDR is particularly useful because it supports evaluation against **human gold annotations**, unlike weakly labeled or scraped alternatives.
+BC5CDR is available from the [BioCreative V challenge page](https://biocreative.bioinformatics.udel.edu/tasks/biocreative-v/track-3-cdr/). The raw corpus files are not redistributed in this repository.
 
 ---
 
 # Models Evaluated
 
 ## 1. SciSpacy
-Model:
-- `en_ner_bc5cdr_md`
+Model: `en_ner_bc5cdr_md`
 
-Characteristics:
-- fastest model in this project
-- strongest overall performance
-- high precision and high recall
+- fastest model in the study (0.024s per note)
+- strongest overall F1 against human gold (0.896)
+- high precision and recall across both entity types
 
 ## 2. BioBERT
-Pipeline:
-- disease model: `alvaroalon2/biobert_diseases_ner`
-- chemical model: `alvaroalon2/biobert_chemical_ner`
+Disease model: `alvaroalon2/biobert_diseases_ner`
+Chemical model: `alvaroalon2/biobert_chemical_ner`
 
-Characteristics:
-- hybrid BioBERT-based pipeline
-- strong chemical extraction relative to disease extraction
-- moderate runtime
+- hybrid dual-pipeline approach
+- strong chemical recognition (F1: 0.750), weaker disease recognition (F1: 0.268)
+- moderate runtime (0.46s per note)
 
 ## 3. PubMedBERT
-Pipeline:
-- disease model: `sarahmiller137/BiomedNLP-PubMedBERT-base-uncased-abstract-fulltext-ft-ncbi-disease`
-- chemical model: `OpenMed/OpenMed-NER-ChemicalDetect-PubMed-335M`
+Disease model: `sarahmiller137/BiomedNLP-PubMedBERT-base-uncased-abstract-fulltext-ft-ncbi-disease`
+Chemical model: `OpenMed/OpenMed-NER-ChemicalDetect-PubMed-335M`
 
-Characteristics:
-- strong chemical recognition
-- weak disease performance in this setup
-- slowest runtime
+- strong chemical recognition (F1: 0.836) but weak disease recognition (F1: 0.128)
+- slowest model by a large margin (3.48s per note)
 
 ## 4. ClinicalBERT
-Model:
-- `samrawal/bert-base-uncased_clinical-ner`
+Model: `samrawal/bert-base-uncased_clinical-ner`
 
-Characteristics:
 - designed for clinical narratives
-- relatively high recall
-- tends to over-predict entities
+- tends to over-predict entity spans, leading to low precision
+- TEST labels filtered from output before evaluation
 
 ## 5. BioELECTRA
-Model:
-- `d4data/biomedical-ner-all`
+Model: `d4data/biomedical-ner-all`
 
-Characteristics:
-- balanced precision-recall trade-off
-- efficient runtime
-- stronger overall balance than ClinicalBERT in this study
+- best precision-recall balance among transformer models
+- efficient runtime (0.13s per note)
+- label mapping: `Disease_disorder` → DISEASE, `Medication` / `Therapeutic_procedure` → CHEMICAL
 
 ---
 
@@ -108,27 +92,27 @@ Characteristics:
 ```text
 BC5CDR Raw PubTator Files
 ↓
-Dataset Parsing
+Dataset Parsing  (parse_bc5cdr.py)
 ↓
 BC5CDR docs/entities JSONL files
 ↓
-Human Gold BIO Construction
+Human Gold BIO Construction  (build_gold_bc5cdr.py)
 ↓
-NER Prediction with 5 Models
-├── SciSpacy
-├── BioBERT
-├── PubMedBERT
-├── ClinicalBERT
-└── BioELECTRA
+NER Prediction — 5 Models
+├── SciSpacy          (scispacy_bc5cdr.py)
+├── BioBERT           (biobert_bc5cdr.py)
+├── PubMedBERT        (pubmed_bc5cdr.py)
+├── ClinicalBERT      (clinicalbert_bc5cdr.py)
+└── BioELECTRA        (bioelectra_bc5cdr.py)
 ↓
-Pseudo-Gold Construction (majority voting, ≥ 3 votes)
+Pseudo-Gold Construction — majority voting ≥ 3/5  (candidate_gold.py)
 ↓
-Benchmark Evaluation
+Benchmark Evaluation  (bc5cdr_evaluation.py)
 ├── Pseudo-Gold vs Human Gold
 ├── Models vs Human Gold
 └── Models vs Pseudo-Gold
 ↓
-Figures, confusion matrices, per-label tables, and runtime plots
+Figures, confusion matrices, per-label tables, runtime plots  (graph.py)
 ```
 
 ---
@@ -137,34 +121,17 @@ Figures, confusion matrices, per-label tables, and runtime plots
 
 ## Human Gold
 
-Human gold annotations are derived directly from BC5CDR and converted into **BIO format** for evaluation.
+Human gold annotations are derived directly from BC5CDR expert annotations and converted to **BIO token format** for sequence evaluation.
 
-Main file:
-- `data/gold/bc5cdr_train_gold_bio.jsonl`
+Output file: `data/gold/bc5cdr_train_gold_bio.jsonl`
 
 ## Pseudo-Gold
 
-Pseudo-gold annotations are constructed through **majority voting** across model predictions.
+Pseudo-gold annotations are constructed by majority voting across all five model predictions. An entity is retained when **at least 3 of 5 models agree** on the same span and label.
 
-### Voting setup
+Output file: `data/gold/candidate_gold_train_entities_bc5cdr.jsonl`
 
-The pseudo-gold construction uses predictions from:
-
-- SciSpacy
-- BioBERT
-- PubMedBERT
-- ClinicalBERT
-- BioELECTRA
-
-An entity is retained when:
-
-- **at least 3 models agree**
-
-Main evaluation file:
-- `data/gold/candidate_gold_train_entities_bc5cdr.jsonl`
-
-Additional gold directory file present in the project:
-- `data/gold/candidate_gold_entities.jsonl`
+The pseudo-gold achieves high precision (0.93) against human gold, confirming that agreed-upon entities are reliable. Lower recall (0.54) reflects its conservative nature — harder or ambiguous entities are excluded.
 
 ---
 
@@ -177,46 +144,38 @@ data/
 │   └── candidate_gold_train_entities_bc5cdr.jsonl
 ├── processed/
 │   └── bc5cdr/
+│       ├── bc5cdr_train_docs.jsonl
+│       ├── bc5cdr_train_entities.jsonl
 │       ├── bc5cdr_dev_docs.jsonl
 │       ├── bc5cdr_dev_entities.jsonl
 │       ├── bc5cdr_test_docs.jsonl
 │       ├── bc5cdr_test_entities.jsonl
-│       ├── bc5cdr_train_docs.jsonl
-│       ├── bc5cdr_train_entities.jsonl
+│       ├── scispacy_train_entities_bc5cdr.jsonl
 │       ├── biobert_train_entities_bc5cdr.jsonl
-│       ├── bioelectra_train_entities_bc5cdr.jsonl
+│       ├── pubmedbert_train_entities_bc5cdr.jsonl
 │       ├── clinicalbert_train_entities_bc5cdr.jsonl
 │       ├── clinicalbert_train_entities_bc5cdr_clean.jsonl
-│       ├── pubmedbert_train_entities_bc5cdr.jsonl
-│       └── scispacy_train_entities_bc5cdr.jsonl
+│       └── bioelectra_train_entities_bc5cdr.jsonl
 
 figure/
 ├── candidate_vs_human_performance.png
-├── confusion_matrix_biobert.png
-├── confusion_matrix_bioelectra.png
-├── confusion_matrix_candidate_biobert.png
-├── confusion_matrix_candidate_bioelectra.png
-├── confusion_matrix_candidate_clinicalbert.png
-├── confusion_matrix_candidate_pubmedbert.png
-├── confusion_matrix_candidate_scispacy.png
 ├── confusion_matrix_candidate_vs_human.png
-├── confusion_matrix_clinicalbert.png
-├── confusion_matrix_human_biobert.png
-├── confusion_matrix_human_bioelectra.png
-├── confusion_matrix_human_clinicalbert.png
-├── confusion_matrix_human_pubmedbert.png
-├── confusion_matrix_human_scispacy.png
-├── confusion_matrix_pubmedbert.png
-├── confusion_matrix_scispacy.png
-├── model_performance_candidate_gold.png
-├── model_performance_comparison.png
 ├── model_performance_human_gold.png
-├── model_runtime_candidate_gold.png
-├── model_runtime_comparison.png
+├── model_performance_candidate_gold.png
 ├── model_runtime_human_gold.png
-├── per_label_performance.png
+├── model_runtime_candidate_gold.png
+├── per_label_performance_human_gold.png
 ├── per_label_performance_candidate_gold.png
-└── per_label_performance_human_gold.png
+├── confusion_matrix_human_scispacy.png
+├── confusion_matrix_human_biobert.png
+├── confusion_matrix_human_pubmedbert.png
+├── confusion_matrix_human_clinicalbert.png
+├── confusion_matrix_human_bioelectra.png
+├── confusion_matrix_candidate_scispacy.png
+├── confusion_matrix_candidate_biobert.png
+├── confusion_matrix_candidate_pubmedbert.png
+├── confusion_matrix_candidate_clinicalbert.png
+└── confusion_matrix_candidate_bioelectra.png
 
 logs/
 └── evaluation.log
@@ -242,10 +201,10 @@ src/
 
 ## 1. Create and activate a virtual environment
 
-### Windows
 ```bash
 python -m venv .venv
-.venv\Scripts\activate
+.venv\Scripts\activate        # Windows
+source .venv/bin/activate     # macOS / Linux
 ```
 
 ## 2. Install dependencies
@@ -255,7 +214,7 @@ pip install -r requirements/base.txt
 pip install -r requirements/torch.txt
 ```
 
-Optional:
+Optional development dependencies:
 ```bash
 pip install -r requirements/dev.txt
 ```
@@ -264,25 +223,34 @@ pip install -r requirements/dev.txt
 
 # Running the Project
 
-## Step 1 — Parse BC5CDR
+## Step 1 — Obtain BC5CDR data
+
+Download the raw PubTator files from the [BioCreative V CDR task page](https://biocreative.bioinformatics.udel.edu/tasks/biocreative-v/track-3-cdr/) and place them in `data/raw/bc5cdr/`:
+
+```
+data/raw/bc5cdr/
+├── CDR_TrainingSet.PubTator.txt
+├── CDR_DevelopmentSet.PubTator.txt
+└── CDR_TestSet.PubTator.txt
+```
+
+## Step 2 — Parse BC5CDR
 
 ```bash
 python -m src.parse_bc5cdr
 ```
 
-This produces parsed document and entity JSONL files for train, dev, and test sets.
+Produces parsed document and entity JSONL files for train, dev, and test splits.
 
-## Step 2 — Build Human Gold BIO Labels
+## Step 3 — Build Human Gold BIO Labels
 
 ```bash
 python -m src.build_gold_bc5cdr
 ```
 
-This creates:
+Produces: `data/gold/bc5cdr_train_gold_bio.jsonl`
 
-- `data/gold/bc5cdr_train_gold_bio.jsonl`
-
-## Step 3 — Run NER Models
+## Step 4 — Run NER Models
 
 ```bash
 python -m src.scispacy_bc5cdr
@@ -292,117 +260,91 @@ python -m src.clinicalbert_bc5cdr
 python -m src.bioelectra_bc5cdr
 ```
 
-These generate model prediction files in:
+Model predictions are saved to `data/processed/bc5cdr/`.
 
-- `data/processed/bc5cdr/`
-
-## Step 4 — Build Pseudo-Gold
+## Step 5 — Build Pseudo-Gold
 
 ```bash
 python -m src.candidate_gold
 ```
 
-This creates the pseudo-gold entity file used in evaluation.
-
-## Step 5 — Run Evaluation
+## Step 6 — Run Evaluation
 
 ```bash
 python -m src.bc5cdr_evaluation
 ```
 
-This produces:
-
-- overall performance summaries
-- per-label metrics
-- confusion matrices
-- runtime figures
-- saved plots in `figure/`
+Produces performance summaries, per-label metrics, confusion matrices, and all figures saved to `figure/`.
 
 ---
 
 # Logging
 
-To save evaluation output:
-
 ```bash
 python -m src.bc5cdr_evaluation > logs/evaluation.log
-```
 
-To save model logs individually:
-
-```bash
-python -m src.scispacy_bc5cdr > logs/scispacy.log
-python -m src.biobert_bc5cdr > logs/biobert.log
-python -m src.pubmed_bc5cdr > logs/pubmedbert.log
+# Individual model logs
+python -m src.scispacy_bc5cdr    > logs/scispacy.log
+python -m src.biobert_bc5cdr     > logs/biobert.log
+python -m src.pubmed_bc5cdr      > logs/pubmedbert.log
 python -m src.clinicalbert_bc5cdr > logs/clinicalbert.log
-python -m src.bioelectra_bc5cdr > logs/bioelectra.log
-python -m src.candidate_gold > logs/candidate_gold.log
-python -m src.bc5cdr_evaluation > logs/evaluation.log
+python -m src.bioelectra_bc5cdr  > logs/bioelectra.log
+python -m src.candidate_gold     > logs/candidate_gold.log
 ```
 
 ---
 
-# Main Results
+# Results
+
+> **Note:** All results below are reported on the **BC5CDR training split**. Evaluation on the held-out test split is planned for the next phase of this work.
 
 ## Pseudo-Gold vs Human Gold
 
-Final evaluation:
+| Metric | Score |
+|--------|------:|
+| Precision | **0.9308** |
+| Recall | **0.5397** |
+| F1-score | **0.6832** |
 
-- Precision: **0.9308**
-- Recall: **0.5397**
-- F1-score: **0.6832**
+High precision confirms that pseudo-gold entities are reliable where models agree. Lower recall reflects the conservative nature of majority voting — ambiguous or harder entities are excluded by design.
 
-Interpretation:
-
-- very high precision indicates that pseudo-gold annotations are **high-confidence**
-- lower recall shows that pseudo-gold is **conservative**
-- majority voting captures reliable entities but misses harder cases
-
-### Figure
 ![Pseudo-Gold vs Human Gold](figure/candidate_vs_human_performance.png)
-
-### Confusion Matrix
-![Confusion Matrix - Pseudo-Gold vs Human Gold](figure/confusion_matrix_candidate_vs_human.png)
+![Confusion Matrix — Pseudo-Gold vs Human Gold](figure/confusion_matrix_candidate_vs_human.png)
 
 ---
 
-# Model Performance vs Human Gold
+## Model Performance vs Human Gold
 
 | Model | Precision | Recall | F1-score |
-|------|----------:|-------:|---------:|
-| SciSpacy | 0.9334 | 0.8613 | 0.8959 |
+|-------|----------:|-------:|---------:|
+| SciSpacy | 0.9334 | 0.8613 | **0.8959** |
+| BioELECTRA | 0.4855 | 0.4448 | 0.4642 |
 | BioBERT | 0.3474 | 0.6485 | 0.4525 |
 | PubMedBERT | 0.3057 | 0.5842 | 0.4014 |
 | ClinicalBERT | 0.2987 | 0.4247 | 0.3507 |
-| BioELECTRA | 0.4855 | 0.4448 | 0.4642 |
 
-### Figure
 ![Model Performance vs Human Gold](figure/model_performance_human_gold.png)
-
-### Additional legacy comparison figure
-![Model Performance Comparison](figure/model_performance_comparison.png)
 
 ---
 
-# Model Performance vs Pseudo-Gold
+## Model Performance vs Pseudo-Gold
 
 | Model | Precision | Recall | F1-score |
-|------|----------:|-------:|---------:|
-| SciSpacy | 0.5761 | 0.9169 | 0.7076 |
+|-------|----------:|-------:|---------:|
+| SciSpacy | 0.5761 | 0.9169 | **0.7076** |
+| BioELECTRA | 0.3832 | 0.6054 | 0.4693 |
+| ClinicalBERT | 0.2646 | 0.6488 | 0.3759 |
 | BioBERT | 0.2376 | 0.7650 | 0.3626 |
 | PubMedBERT | 0.2051 | 0.6760 | 0.3147 |
-| ClinicalBERT | 0.2646 | 0.6488 | 0.3759 |
-| BioELECTRA | 0.3832 | 0.6054 | 0.4693 |
 
-### Figure
 ![Model Performance vs Pseudo-Gold](figure/model_performance_candidate_gold.png)
 
 ---
 
-# Per-Label Performance vs Human Gold
+## Per-Label Performance vs Human Gold
 
 | Model | Label | Precision | Recall | F1-score | Support |
-|------|------|----------:|-------:|---------:|--------:|
+|-------|-------|----------:|-------:|---------:|--------:|
 | SciSpacy | DISEASE | 0.9290 | 0.8988 | 0.9137 | 4180 |
 | SciSpacy | CHEMICAL | 0.9374 | 0.8308 | 0.8809 | 5135 |
 | BioBERT | DISEASE | 0.1795 | 0.5278 | 0.2679 | 4180 |
@@ -414,18 +356,14 @@ Interpretation:
 | BioELECTRA | DISEASE | 0.3824 | 0.4014 | 0.3917 | 4180 |
 | BioELECTRA | CHEMICAL | 0.5945 | 0.4800 | 0.5312 | 5135 |
 
-### Figure
 ![Per-label Performance vs Human Gold](figure/per_label_performance_human_gold.png)
-
-### Additional legacy table figure
-![Per-label Performance](figure/per_label_performance.png)
 
 ---
 
-# Per-Label Performance vs Pseudo-Gold
+## Per-Label Performance vs Pseudo-Gold
 
 | Model | Label | Precision | Recall | F1-score | Support |
-|------|------|----------:|-------:|---------:|--------:|
+|-------|-------|----------:|-------:|---------:|--------:|
 | SciSpacy | DISEASE | 0.5687 | 0.9237 | 0.7040 | 2490 |
 | SciSpacy | CHEMICAL | 0.5827 | 0.9110 | 0.7108 | 2911 |
 | BioBERT | DISEASE | 0.1189 | 0.5867 | 0.1977 | 2490 |
@@ -437,122 +375,82 @@ Interpretation:
 | BioELECTRA | DISEASE | 0.3108 | 0.5478 | 0.3966 | 2490 |
 | BioELECTRA | CHEMICAL | 0.4597 | 0.6548 | 0.5402 | 2911 |
 
-### Figure
 ![Per-label Performance vs Pseudo-Gold](figure/per_label_performance_candidate_gold.png)
 
 ---
 
-# Runtime Analysis
+## Runtime Analysis
 
-## Final average runtime per note
-
-| Model | Avg Runtime per Note (seconds) |
-|------|-------------------------------:|
+| Model | Avg Runtime per Note (s) |
+|-------|-------------------------:|
 | SciSpacy | 0.0238 |
+| BioELECTRA | 0.1267 |
+| ClinicalBERT | 0.2107 |
 | BioBERT | 0.4634 |
 | PubMedBERT | 3.4778 |
-| ClinicalBERT | 0.2107 |
-| BioELECTRA | 0.1267 |
 
-Interpretation:
+SciSpacy is the fastest model by a large margin. BioELECTRA offers the strongest speed-performance balance among transformer models. PubMedBERT is the slowest due to its dual-pipeline design.
 
-- **SciSpacy** is the fastest model by a large margin
-- **PubMedBERT** is the slowest model
-- **BioELECTRA** offers a strong balance between speed and performance
-- **BioBERT** is substantially faster than PubMedBERT in this setup
-
-### Figures
 ![Model Runtime vs Human Gold](figure/model_runtime_human_gold.png)
-
 ![Model Runtime vs Pseudo-Gold](figure/model_runtime_candidate_gold.png)
-
-### Additional legacy comparison figure
-![Model Runtime Comparison](figure/model_runtime_comparison.png)
 
 ---
 
-# Confusion Matrices
+## Confusion Matrices
 
-## Pseudo-Gold vs Human Gold
-![Confusion Matrix - Pseudo-Gold vs Human Gold](figure/confusion_matrix_candidate_vs_human.png)
+### Pseudo-Gold vs Human Gold
+![Confusion Matrix — Pseudo-Gold vs Human Gold](figure/confusion_matrix_candidate_vs_human.png)
 
-## SciSpacy vs Human Gold
-![Confusion Matrix vs Human Gold - SciSpacy](figure/confusion_matrix_human_scispacy.png)
+### Models vs Human Gold
+![SciSpacy](figure/confusion_matrix_human_scispacy.png)
+![BioBERT](figure/confusion_matrix_human_biobert.png)
+![PubMedBERT](figure/confusion_matrix_human_pubmedbert.png)
+![ClinicalBERT](figure/confusion_matrix_human_clinicalbert.png)
+![BioELECTRA](figure/confusion_matrix_human_bioelectra.png)
 
-## BioBERT vs Human Gold
-![Confusion Matrix vs Human Gold - BioBERT](figure/confusion_matrix_human_biobert.png)
-
-## PubMedBERT vs Human Gold
-![Confusion Matrix vs Human Gold - PubMedBERT](figure/confusion_matrix_human_pubmedbert.png)
-
-## ClinicalBERT vs Human Gold
-![Confusion Matrix vs Human Gold - ClinicalBERT](figure/confusion_matrix_human_clinicalbert.png)
-
-## BioELECTRA vs Human Gold
-![Confusion Matrix vs Human Gold - BioELECTRA](figure/confusion_matrix_human_bioelectra.png)
-
-## SciSpacy vs Pseudo-Gold
-![Confusion Matrix vs Pseudo-Gold - SciSpacy](figure/confusion_matrix_candidate_scispacy.png)
-
-## BioBERT vs Pseudo-Gold
-![Confusion Matrix vs Pseudo-Gold - BioBERT](figure/confusion_matrix_candidate_biobert.png)
-
-## PubMedBERT vs Pseudo-Gold
-![Confusion Matrix vs Pseudo-Gold - PubMedBERT](figure/confusion_matrix_candidate_pubmedbert.png)
-
-## ClinicalBERT vs Pseudo-Gold
-![Confusion Matrix vs Pseudo-Gold - ClinicalBERT](figure/confusion_matrix_candidate_clinicalbert.png)
-
-## BioELECTRA vs Pseudo-Gold
-![Confusion Matrix vs Pseudo-Gold - BioELECTRA](figure/confusion_matrix_candidate_bioelectra.png)
-
-## Additional legacy confusion matrices
-![Confusion Matrix - SciSpacy](figure/confusion_matrix_scispacy.png)
-
-![Confusion Matrix - BioBERT](figure/confusion_matrix_biobert.png)
-
-![Confusion Matrix - PubMedBERT](figure/confusion_matrix_pubmedbert.png)
-
-![Confusion Matrix - ClinicalBERT](figure/confusion_matrix_clinicalbert.png)
-
-![Confusion Matrix - BioELECTRA](figure/confusion_matrix_bioelectra.png)
+### Models vs Pseudo-Gold
+![SciSpacy](figure/confusion_matrix_candidate_scispacy.png)
+![BioBERT](figure/confusion_matrix_candidate_biobert.png)
+![PubMedBERT](figure/confusion_matrix_candidate_pubmedbert.png)
+![ClinicalBERT](figure/confusion_matrix_candidate_clinicalbert.png)
+![BioELECTRA](figure/confusion_matrix_candidate_bioelectra.png)
 
 ---
 
 # Key Findings
 
-- **SciSpacy** is the strongest overall model in this study
-- **Pseudo-gold annotations** are high precision but conservative
-- **Chemical entities** are easier to detect consistently than disease entities
-- **PubMedBERT** shows strong chemical recognition but weak disease recognition
-- **ClinicalBERT** tends to over-predict entity spans
-- **BioELECTRA** provides the best balance among transformer-based models
+- **SciSpacy** achieves the highest F1 against human gold (0.896) and is by far the fastest model, making it the most practical choice for large-scale extraction on BC5CDR-style data
+- **Pseudo-gold annotations** are high precision but conservative — they capture reliable entities but miss harder cases
+- **Chemical entities** are consistently easier to detect than disease entities across all transformer models
+- **BioBERT and PubMedBERT** show a clear split: strong chemical recognition, weak disease recognition, suggesting the disease fine-tuning datasets used differ significantly from BC5CDR
+- **BioELECTRA** provides the best balance among transformer models across both speed and F1
+- **ClinicalBERT** over-predicts entity spans, performing better on clinical text than on biomedical abstracts
 
 ---
 
-# Important Methodological Note
+# Methodological Note
 
-The pseudo-gold annotations are **consensus-based references**, not replacements for human ground truth. They are intended as supplementary evaluation resources. Because pseudo-gold is built from model agreement, it should be interpreted as a **high-confidence but incomplete annotation layer**.
+Pseudo-gold annotations are **consensus-based references**, not replacements for human ground truth. They serve as a supplementary evaluation layer to examine whether model agreement correlates with annotation quality. The high precision of pseudo-gold (0.93) against BC5CDR human annotations validates this approach for identifying high-confidence entities, while the lower recall (0.54) confirms it should not be treated as a complete annotation.
 
 ---
 
 # Future Work
 
-Planned extensions include:
-
-- entity normalization with UMLS / MeSH / SNOMED
-- relation extraction
-- clinical knowledge graph construction
-- graph-based reasoning over extracted biomedical entities
-- benchmarking newer models such as LLaMA, BioGPT, and other biomedical foundation models
+- evaluation on BC5CDR development and test splits
+- entity normalization to UMLS, MeSH, and SNOMED CT
+- relation extraction between chemical and disease entities
+- clinical knowledge graph construction from extracted entities
+- graph-based reasoning over biomedical entity networks
+- benchmarking newer models including BioGPT, LLaMA-based biomedical variants, and instruction-tuned models
 
 ---
 
 # License
+
 This project is licensed under the MIT License. See [LICENSE](LICENSE) for details.
+
 ---
 
 # Repository
 
-GitHub:
-`https://github.com/kazx22/spatial-human-anatomy`
+[https://github.com/kazx22/spatial-human-anatomy](https://github.com/kazx22/spatial-human-anatomy)
