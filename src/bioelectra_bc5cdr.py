@@ -131,6 +131,7 @@ def run_bioelectra(docs):
                     "start_char": int(pred["start"]) + char_offset,
                     "end_char": int(pred["end"]) + char_offset,
                     "label": label,
+                    "confidence": float(pred.get("score", 1.0)),
                 }
 
                 all_entities.append(entity)

@@ -49,6 +49,7 @@ def run_scispacy(docs):
                 "start_char": ent.start_char,
                 "end_char": ent.end_char,
                 "label": ent.label_,
+                "confidence": 1.0,
             }
             all_entities.append(entity)
 

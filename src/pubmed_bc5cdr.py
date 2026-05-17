@@ -100,6 +100,7 @@ def predictions_to_entities(predictions, row_id, label_name, char_offset=0):
             "start_char": int(pred["start"]) + char_offset,
             "end_char": int(pred["end"]) + char_offset,
             "label": normalize_label(pred.get("entity_group", label_name), label_name),
+            "confidence": float(pred.get("score", 1.0)),
         }
         entities.append(entity)
 

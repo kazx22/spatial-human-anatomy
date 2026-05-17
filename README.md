@@ -455,9 +455,13 @@ Pseudo-gold annotations are **consensus-based references**, not replacements for
 ---
 
 # License
+<<<<<<< HEAD
 
 This project is licensed under the MIT License. See [LICENSE](LICENSE) for details.
 
+=======
+This project is licensed under the MIT License. See [LICENSE](LICENSE) for details.
+>>>>>>> 7672007cc35484eb8a63dff1cdca27637dd37160
 ---
 
 # Repository

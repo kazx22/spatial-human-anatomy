@@ -102,3 +102,13 @@ def remove_TEST(input_file: str, output_file: str):
 
             if entity["label"] != "TEST":
                 outfile.write(json.dumps(entity) + "\n")
+
+
+def derive_weights(f1: dict) -> dict:
+    total =  sum(f1.values())
+    weights = {}
+
+    for model, f1_score in f1.items():
+        weights[model] = round(f1_score/total,4)
+    
+    return weights

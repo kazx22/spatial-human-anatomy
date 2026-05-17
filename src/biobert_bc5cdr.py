@@ -70,7 +70,6 @@ def chunk_text(text, tokenizer, max_tokens=MAX_TOKENS, overlap_sents=OVERLAP_SEN
             sent = raw_sentences[j]
             sent_token_count = len(tokenizer.encode(sent, add_special_tokens=False))
 
-            
             if token_count + sent_token_count + 2 > max_tokens and chunk_sents:
                 break
 
@@ -101,6 +100,7 @@ def predictions_to_entities(predictions, row_id, label_name, char_offset=0):
                 pred.get("entity_group", pred.get("entity", label_name)),
                 label_name,
             ),
+            "confidence": float(pred.get("score", 1.0)),
         }
         entities.append(entity)
 
