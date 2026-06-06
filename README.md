@@ -94,7 +94,6 @@ Python 3.9+ recommended. Install dependencies:
 
 ```bash
 pip install spacy transformers seqeval scikit-learn numpy matplotlib
-pip install https://s3-us-west-2.amazonaws.com/ai2-s3-scispacy/releases/v0.5.3/en_ner_bc5cdr_md-0.5.3.tar.gz
 ```
 
 ---
@@ -184,51 +183,89 @@ This is a comparative study. Results reflect off-the-shelf performance and shoul
 
 All figures are written to `figure/` when `bc5cdr_evaluation.py` and `threshold_sensitivity.py` are run.
 
-### Figure 1 — Model Performance Against Human Gold (`fig1_models_vs_human_gold.png`)
+### Figure 1 — Model Performance Against Human Gold
+
+![Model performance against human gold annotations (BC5CDR)](figure/fig1_models_vs_human_gold.png)
 
 Grouped bar chart (precision / recall / F1) for all five base models. SciSpacy leads with F1 = 0.90 and the highest precision (0.93). BioBERT has the highest recall (0.86) but low precision (0.63), reflecting over-prediction. PubMedBERT, BioELECTRA, and ClinicalBERT trail significantly, with F1 scores of 0.57, 0.55, and 0.42 respectively.
 
-### Figure 2 — Pseudo-Gold Quality Against Human Gold (`fig2_candidate_gold_comparison.png`)
+---
+
+### Figure 2 — Pseudo-Gold Quality Against Human Gold
+
+![Pseudo-gold annotation quality against human gold (BC5CDR)](figure/fig2_candidate_gold_comparison.png)
 
 Compares majority voting and weighted voting pseudo-gold sets against human gold. Majority voting achieves high precision (0.931) but poor recall (0.540), giving F1 = 0.683. Weighted voting improves recall substantially (0.741) while maintaining near-perfect precision (0.989), lifting F1 to 0.848. This shows the F1-weighted scheme retains far more legitimate spans without introducing noise.
 
-### Figure 3 — Per-Label F1 (`fig3_per_label_f1.png`)
+---
+
+### Figure 3 — Per-Label F1
+
+![Per-label F1-score against human gold (BC5CDR)](figure/fig3_per_label_f1.png)
 
 Shows DISEASE and CHEMICAL F1 separately for each model. The chemical detection gap is striking: BioBERT and PubMedBERT both achieve F1 = 0.94 on CHEMICAL despite low overall scores, because their disease checkpoints underperform badly (BioBERT DISEASE F1 = 0.55, PubMedBERT DISEASE F1 = 0.25). SciSpacy is the only model with balanced performance across both types (DISEASE = 0.91, CHEMICAL = 0.88). BioELECTRA shows the reverse of BioBERT — stronger on chemicals (0.63) than diseases (0.46).
 
-### Figure 4 — SciSpacy Confusion Matrix (`fig4_scispacy_confusion_matrix.png`)
+---
+
+### Figure 4 — SciSpacy Confusion Matrix
+
+![SciSpacy confusion matrix vs human gold (BC5CDR)](figure/fig4_scispacy_confusion_matrix.png)
 
 Token-level confusion matrix for the best-performing model. The diagonal is strong: 3801 correct B-DISEASE, 2425 correct I-DISEASE, 4389 correct B-CHEMICAL, 516 correct I-CHEMICAL. The main failure mode is false negatives into O (569 B-CHEMICAL and 126 B-DISEASE missed entirely), and 94 B-DISEASE tokens misclassified as I-CHEMICAL — a label boundary confusion rather than entity-type confusion.
 
-### Figure 5 — Weighted Candidate Gold Confusion Matrix (`fig5_weighted_gold_confusion_matrix.png`)
+---
+
+### Figure 5 — Weighted Candidate Gold Confusion Matrix
+
+![Weighted candidate gold confusion matrix vs human gold (BC5CDR)](figure/fig5_weighted_gold_confusion_matrix.png)
 
 Pseudo-gold vs human gold at the operating threshold (1.5). Errors are almost entirely false negatives — 825 B-DISEASE and 1562 B-CHEMICAL spans predicted as O, consistent with the recall = 0.741 in Figure 2. Cross-type confusion is essentially zero (no B-DISEASE predicted as B-CHEMICAL or vice versa), confirming the framework does not introduce label noise, only recall loss.
 
-### Figure 6 — All Model Confusion Matrices (`fig6_all_model_confusion_matrices.png`)
+---
+
+### Figure 6 — All Model Confusion Matrices
+
+![All model confusion matrices vs human gold (BC5CDR)](figure/fig6_all_model_confusion_matrices.png)
 
 2×3 grid showing all five models side by side. Key observations: BioBERT has a large I-DISEASE false positive block (16,874 true-O tokens predicted as I-DISEASE), suggesting the disease model is generating spurious multi-token continuations. PubMedBERT shows a similar but smaller pattern (13,301). ClinicalBERT has broad off-diagonal spread across all classes, consistent with domain mismatch from i2b2 training. BioELECTRA has the cleanest off-diagonal outside SciSpacy, with most errors being true false negatives rather than cross-type confusion.
 
-### Threshold Sensitivity Curve (`figure/threshold_sensitivity_curve.png`)
+---
+
+### Threshold Sensitivity Curve
+
+![Pseudo-gold threshold sensitivity vs human gold](figure/threshold_sensitivity_curve.png)
 
 Precision, recall, and F1 of the weighted pseudo-gold set versus human gold across thresholds 0.45–2.00. Precision climbs steeply from 0.40 at threshold 0.45 to 0.989 at 1.5, then plateaus near 1.0. Recall peaks around 0.79 at low thresholds and falls to 0.57 at 2.0 as fewer spans are retained. F1 peaks at **threshold = 1.5 (F1 = 0.848)**, marked with a dashed vertical line, which is the operating threshold used throughout the paper.
 
-### Per-Threshold Bar Charts (`figure/sensitivity/`)
+---
+
+### Per-Threshold Bar Charts
 
 Individual precision/recall/F1 bar charts for each of the seven thresholds tested:
 
-| Threshold | Precision  | Recall     | F1         |
-| --------- | ---------- | ---------- | ---------- |
-| 0.45      | 0.4029     | 0.6943     | 0.5099     |
-| 0.70      | 0.5838     | 0.7931     | 0.6726     |
-| 0.90      | 0.6929     | 0.7829     | 0.7351     |
-| 1.20      | 0.7611     | 0.7944     | 0.7774     |
-| **1.50**  | **0.9893** | **0.7415** | **0.8476** |
-| 1.80      | 0.9929     | 0.6150     | 0.7596     |
-| 2.00      | 0.9951     | 0.5658     | 0.7214     |
+| Threshold | Precision  | Recall     | F1         | Figure                                                |
+| --------- | ---------- | ---------- | ---------- | ----------------------------------------------------- |
+| 0.45      | 0.4029     | 0.6943     | 0.5099     | ![t=0.45](figure/sensitivity/threshold_0.45_bars.png) |
+| 0.70      | 0.5838     | 0.7931     | 0.6726     | ![t=0.70](figure/sensitivity/threshold_0.7_bars.png)  |
+| 0.90      | 0.6929     | 0.7829     | 0.7351     | ![t=0.90](figure/sensitivity/threshold_0.9_bars.png)  |
+| 1.20      | 0.7611     | 0.7944     | 0.7774     | ![t=1.20](figure/sensitivity/threshold_1.2_bars.png)  |
+| **1.50**  | **0.9893** | **0.7415** | **0.8476** | ![t=1.50](figure/sensitivity/threshold_1.5_bars.png)  |
+| 1.80      | 0.9929     | 0.6150     | 0.7596     | ![t=1.80](figure/sensitivity/threshold_1.8_bars.png)  |
+| 2.00      | 0.9951     | 0.5658     | 0.7214     | ![t=2.00](figure/sensitivity/threshold_2.0_bars.png)  |
 
-### Per-Model Confusion Matrices (`figure/confusion/`)
+---
+
+### Per-Model Confusion Matrices
 
 Full-size individual confusion matrices for all five models, equivalent to the panels in Figure 6 but at higher resolution for supplementary use.
+
+| Model        | Confusion Matrix                                                       |
+| ------------ | ---------------------------------------------------------------------- |
+| SciSpacy     | ![SciSpacy confusion matrix](figure/confusion/cm_scispacy.png)         |
+| BioBERT      | ![BioBERT confusion matrix](figure/confusion/cm_biobert.png)           |
+| PubMedBERT   | ![PubMedBERT confusion matrix](figure/confusion/cm_pubmedbert.png)     |
+| ClinicalBERT | ![ClinicalBERT confusion matrix](figure/confusion/cm_clinicalbert.png) |
+| BioELECTRA   | ![BioELECTRA confusion matrix](figure/confusion/cm_bioelectra.png)     |
 
 ---
 
