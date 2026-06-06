@@ -1,6 +1,24 @@
+"""
+parse_bc5cdr.py — parses the raw BC5CDR PubTator files into JSONL.
+
+BC5CDR is distributed in PubTator format: each document is a block of
+tab/pipe-delimited lines separated by blank lines.  The first two lines are
+the title and abstract; subsequent lines are entity annotations.
+
+This script converts all three splits (train, dev, test) into two JSONL files
+each:
+  bc5cdr_{split}_docs.jsonl     — one record per document: {row_id, full_text}
+  bc5cdr_{split}_entities.jsonl — one record per entity span
+
+full_text is title + " " + abstract.  Character offsets in the annotation
+lines are relative to this concatenated string, which is how BC5CDR defines
+them, so no offset adjustment is needed.
+
+Pipeline position: first step; all other scripts consume the output of this one.
+"""
+
 from pathlib import Path
 import json
-
 
 LABEL_MAP = {
     "Disease": "DISEASE",
@@ -14,22 +32,35 @@ def save_jsonl(records, output_file):
     print(f"Saving {len(records)} records to {output_file}...")
     with out_path.open("w", encoding="utf-8") as f:
         for record in records:
-            json_line = json.dumps(record, ensure_ascii=False)
-            f.write(json_line + "\n")
+            f.write(json.dumps(record, ensure_ascii=False) + "\n")
 
 
 def parse_bc5cdr(file_path):
+    """
+    Parse a single BC5CDR PubTator file into doc and entity lists.
+
+    PubTator format per document:
+      {pmid}|t|{title}
+      {pmid}|a|{abstract}
+      {pmid}\t{start}\t{end}\t{text}\t{label}\t{mesh_id}
+      (blank line)
+
+    full_text is constructed as title + " " + abstract, which matches the
+    offset convention used by the BC5CDR annotations — the offsets in the
+    annotation lines refer to this concatenated string.
+
+    Entity lines with fewer than 5 tab-separated fields are skipped; these
+    are typically relation annotations (CID lines) rather than entity spans.
+    """
     with open(file_path, "r", encoding="utf-8") as f:
         content = f.read()
 
     documents = content.strip().split("\n\n")
-
     all_entities = []
     all_docs = []
 
     for doc in documents:
         lines = doc.strip().split("\n")
-
         if len(lines) < 2:
             continue
 
@@ -37,10 +68,11 @@ def parse_bc5cdr(file_path):
         abstract_line = lines[1]
 
         pmid = title_line.split("|")[0]
-
         title = title_line.split("|t|")[1]
         abstract = abstract_line.split("|a|")[1]
 
+        # The single space separator between title and abstract is intentional —
+        # BC5CDR's character offsets assume exactly this join.
         full_text = title + " " + abstract
         doc_record = {
             "row_id": int(pmid),
@@ -50,8 +82,8 @@ def parse_bc5cdr(file_path):
 
         for line in lines[2:]:
             parts = line.split("\t")
-
             if len(parts) < 5:
+                # CID (chemical-disease relation) lines have fewer fields; skip them
                 continue
 
             start_char = int(parts[1])
@@ -59,6 +91,7 @@ def parse_bc5cdr(file_path):
             entity_text = parts[3]
             label = parts[4]
 
+            # Normalise label casing to match the rest of the pipeline
             label = LABEL_MAP.get(label, label)
 
             entity = {
@@ -67,31 +100,14 @@ def parse_bc5cdr(file_path):
                 "start_char": start_char,
                 "end_char": end_char,
                 "label": label,
-                # "full_text": full_text,
             }
-
             all_entities.append(entity)
+
     print(f"Parsed {len(all_entities)} entities from {file_path}")
     return all_docs, all_entities
 
 
 if __name__ == "__main__":
-    #     input_file = Path("data/raw/bc5cdr/CDR_TrainingSet.PubTator.txt")
-    #     output_file = Path("data/processed/bc5cdr/bc5cdr_train_entities.jsonl")
-
-    #     print("Script started")
-    #     print("Current working directory:", Path.cwd())
-    #     print("Input exists:", input_file.exists())
-    #     print("Input path:", input_file)
-
-    #     records = parse_bc5cdr(input_file)
-    #     print("Parsing done")
-
-    #     save_jsonl(records, output_file)
-    #     print("Saving done")
-
-    #     print(f"Saved {len(records)} entities to {output_file}")
-
     base_input = Path("data/raw/bc5cdr")
     base_output = Path("data/processed/bc5cdr")
 
