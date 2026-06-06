@@ -94,7 +94,6 @@ Python 3.9+ recommended. Install dependencies:
 
 ```bash
 pip install spacy transformers seqeval scikit-learn numpy matplotlib
-pip install https://s3-us-west-2.amazonaws.com/ai2-s3-scispacy/releases/v0.5.3/en_ner_bc5cdr_md-0.5.3.tar.gz
 ```
 
 ---
