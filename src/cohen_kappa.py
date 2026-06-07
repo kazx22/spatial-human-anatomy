@@ -25,6 +25,7 @@ import itertools
 from pathlib import Path
 
 import numpy as np
+import matplotlib.pyplot as plt
 from sklearn.metrics import cohen_kappa_score
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
@@ -102,6 +103,56 @@ def print_matrix(names, matrix):
         print(row)
 
 
+def plot_kappa_heatmap(model_names, matrix, output_file="figure/kappa_heatmap.png"):
+    """
+    Render the pairwise kappa matrix as a heatmap. The matrix passed in only
+    has the upper triangle filled (that's how I build it in main), so here I
+    mirror it into a full symmetric matrix and set the diagonal to 1.0 before
+    plotting. I find the heatmap far easier to read than the text matrix for
+    the paper — the BioBERT/PubMedBERT cluster is obvious at a glance.
+    """
+    import os
+
+    os.makedirs(os.path.dirname(output_file), exist_ok=True)
+
+    n = len(model_names)
+    full = np.eye(n)  # diagonal = 1.0 (a model agrees perfectly with itself)
+    for i in range(n):
+        for j in range(i + 1, n):
+            full[i][j] = matrix[i][j]
+            full[j][i] = matrix[i][j]  # mirror
+
+    fig, ax = plt.subplots(figsize=(7.5, 6.5))
+    im = ax.imshow(full, cmap="YlGnBu", vmin=0, vmax=1)
+
+    ax.set_xticks(np.arange(n))
+    ax.set_yticks(np.arange(n))
+    ax.set_xticklabels(model_names, rotation=45, ha="right")
+    ax.set_yticklabels(model_names)
+
+    # Annotate each cell; switch text colour so it stays readable on dark cells
+    for i in range(n):
+        for j in range(n):
+            val = full[i][j]
+            color = "white" if val > 0.6 else "black"
+            ax.text(j, i, f"{val:.2f}", ha="center", va="center", color=color)
+
+    cbar = fig.colorbar(im, ax=ax, fraction=0.046, pad=0.04)
+    cbar.set_label("Cohen's $\\kappa$", rotation=270, labelpad=18)
+
+    ax.set_title(
+        "Pairwise Inter-Model Agreement (Cohen's $\\kappa$)\n"
+        "BC5CDR, token-level BIO labels",
+        fontsize=13,
+        pad=12,
+    )
+
+    plt.tight_layout()
+    plt.savefig(output_file, dpi=300, bbox_inches="tight")
+    plt.close()
+    print(f"\nSaved kappa heatmap -> {output_file}")
+
+
 def main():
     print("Loading documents...")
     docs = load_jsonl(DOCS_FILE)
@@ -170,6 +221,9 @@ def main():
         f"  Best vs gold           : {model_names[int(np.argmax(vs_gold))]} "
         f"(k = {np.max(vs_gold):.4f})"
     )
+
+    # Render the heatmap version of the pairwise matrix for the paper
+    plot_kappa_heatmap(model_names, matrix)
 
 
 if __name__ == "__main__":
