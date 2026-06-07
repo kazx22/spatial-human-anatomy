@@ -306,15 +306,15 @@ Precision, recall, and F1 of the weighted pseudo-gold set versus human gold acro
 
 Individual precision/recall/F1 bar charts for each of the seven thresholds tested:
 
-| Threshold | Precision | Recall | F1 | Figure |
-|---|---|---|---|---|
-| 0.45 | 0.4029 | 0.6943 | 0.5099 | ![t=0.45](figure/sensitivity/threshold_0.45_bars.png) |
-| 0.70 | 0.5838 | 0.7931 | 0.6726 | ![t=0.70](figure/sensitivity/threshold_0.7_bars.png) |
-| 0.90 | 0.6929 | 0.7829 | 0.7351 | ![t=0.90](figure/sensitivity/threshold_0.9_bars.png) |
-| 1.20 | 0.7611 | 0.7944 | 0.7774 | ![t=1.20](figure/sensitivity/threshold_1.2_bars.png) |
-| **1.50** | **0.9893** | **0.7415** | **0.8476** | ![t=1.50](figure/sensitivity/threshold_1.5_bars.png) |
-| 1.80 | 0.9929 | 0.6150 | 0.7596 | ![t=1.80](figure/sensitivity/threshold_1.8_bars.png) |
-| 2.00 | 0.9951 | 0.5658 | 0.7214 | ![t=2.00](figure/sensitivity/threshold_2.0_bars.png) |
+| Threshold | Precision  | Recall     | F1         | Figure                                                |
+| --------- | ---------- | ---------- | ---------- | ----------------------------------------------------- |
+| 0.45      | 0.4029     | 0.6943     | 0.5099     | ![t=0.45](figure/sensitivity/threshold_0.45_bars.png) |
+| 0.70      | 0.5838     | 0.7931     | 0.6726     | ![t=0.70](figure/sensitivity/threshold_0.7_bars.png)  |
+| 0.90      | 0.6929     | 0.7829     | 0.7351     | ![t=0.90](figure/sensitivity/threshold_0.9_bars.png)  |
+| 1.20      | 0.7611     | 0.7944     | 0.7774     | ![t=1.20](figure/sensitivity/threshold_1.2_bars.png)  |
+| **1.50**  | **0.9893** | **0.7415** | **0.8476** | ![t=1.50](figure/sensitivity/threshold_1.5_bars.png)  |
+| 1.80      | 0.9929     | 0.6150     | 0.7596     | ![t=1.80](figure/sensitivity/threshold_1.8_bars.png)  |
+| 2.00      | 0.9951     | 0.5658     | 0.7214     | ![t=2.00](figure/sensitivity/threshold_2.0_bars.png)  |
 
 ---
 
@@ -322,13 +322,13 @@ Individual precision/recall/F1 bar charts for each of the seven thresholds teste
 
 Full-size individual confusion matrices for all five models, equivalent to the panels in Figure 6 but at higher resolution for supplementary use.
 
-| Model | Confusion Matrix |
-|---|---|
-| SciSpacy | ![SciSpacy confusion matrix](figure/confusion/cm_scispacy.png) |
-| BioBERT | ![BioBERT confusion matrix](figure/confusion/cm_biobert.png) |
-| PubMedBERT | ![PubMedBERT confusion matrix](figure/confusion/cm_pubmedbert.png) |
+| Model        | Confusion Matrix                                                       |
+| ------------ | ---------------------------------------------------------------------- |
+| SciSpacy     | ![SciSpacy confusion matrix](figure/confusion/cm_scispacy.png)         |
+| BioBERT      | ![BioBERT confusion matrix](figure/confusion/cm_biobert.png)           |
+| PubMedBERT   | ![PubMedBERT confusion matrix](figure/confusion/cm_pubmedbert.png)     |
 | ClinicalBERT | ![ClinicalBERT confusion matrix](figure/confusion/cm_clinicalbert.png) |
-| BioELECTRA | ![BioELECTRA confusion matrix](figure/confusion/cm_bioelectra.png) |
+| BioELECTRA   | ![BioELECTRA confusion matrix](figure/confusion/cm_bioelectra.png)     |
 
 ---
 

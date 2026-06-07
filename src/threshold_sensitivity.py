@@ -1,24 +1,15 @@
 """
-threshold_sensitivity.py — evaluates the weighted pseudo-gold framework across
-a range of voting thresholds and produces publication-quality figures.
-
-The threshold controls how much combined F1 weight a span must accumulate
-across models before it enters the pseudo-gold set.  Lower thresholds admit
-more spans (higher recall, lower precision); higher thresholds are more
-conservative.
-
-This script compares each threshold's pseudo-gold set against human gold to
-show where precision and recall trade off and to confirm that the operating
-threshold (1.5) sits at the F1 peak.
-
-Outputs:
-  figure/threshold_sensitivity_curve.png  — combined P/R/F1 vs threshold
-  figure/sensitivity/threshold_<t>_bars.png — per-threshold P/R/F1 bar chart
+threshold_sensitivity.py
+------------------------
+Evaluates each weighted pseudo-gold threshold against human gold and
+produces:
+  (A) one combined sensitivity curve (precision, recall, F1 vs threshold)
+  (B) one bar chart per threshold (P/R/F1 at that threshold)
 
 Prerequisite: run `python -m src.candidate_gold` first so the sensitivity
-JSONL files exist under data/gold/sensitivity/.
+files exist under data/gold/sensitivity/.
 
-Run from the project root:
+Run from PROJECT ROOT:
     python -m src.threshold_sensitivity
 """
 
@@ -44,13 +35,16 @@ SENS_DIR = PROJECT_ROOT / "data" / "gold" / "sensitivity"
 FIG_DIR = PROJECT_ROOT / "figure"
 
 DOCS_FILE = DATA_DIR / "bc5cdr_train_docs.jsonl"
-GOLD_FILE = DATA_DIR / "bc5cdr_train_entities.jsonl"
+# Use the SAME pre-built human gold BIO file as bc5cdr_evaluation.py so the
+# token alignment is identical across both scripts. Rebuilding BIO on the fly
+# from raw entities produced different tokenisation and silently dropped the
+# docs that mismatched, which inflated the F1 at every threshold.
+GOLD_BIO_FILE = PROJECT_ROOT / "data" / "gold" / "bc5cdr_train_gold_bio.jsonl"
 
-# Must match the sweep in candidate_gold.py
 THRESHOLDS = [0.45, 0.70, 0.90, 1.20, 1.50, 1.80, 2.00]
 
 # ------------------------------------------------------------------
-# Colour palette — accessible, print-safe, matches graph.py
+# Professional styling (muted, journal-friendly palette)
 # ------------------------------------------------------------------
 COL_PRECISION = "#1F6FB2"  # strong blue
 COL_RECALL = "#D65A4A"  # coral red
@@ -70,43 +64,61 @@ plt.rcParams.update(
 )
 
 
-def build_gold_map(docs, gold_by_row):
-    """
-    Pre-build per-document (tokens, labels) pairs from human gold.
+# ------------------------------------------------------------------
+# Evaluation
+# ------------------------------------------------------------------
 
-    Caching this avoids repeating span_to_bio for every threshold iteration.
-    """
+
+def build_gold_map(gold_bio_records):
+    # Use the pre-built BIO gold directly (same source as bc5cdr_evaluation.py).
+    # Each record already has aligned tokens and bio_labels, so no re-tokenisation
+    # happens here and the two scripts evaluate against an identical gold.
     gold_map = {}
-    for doc in docs:
-        row_id = doc["row_id"]
-        text = doc["full_text"]
-        entities = gold_by_row.get(row_id, [])
-        tokens, labels = span_to_bio(text, entities)
-        gold_map[row_id] = (tokens, labels)
+    for record in gold_bio_records:
+        gold_map[record["row_id"]] = (record["tokens"], record["bio_labels"])
     return gold_map
 
 
 def evaluate_pseudo_gold(docs, gold_map, pseudo_by_row):
-    """
-    Score a pseudo-gold set against pre-built human gold BIO sequences.
-
-    Documents where tokenisation doesn't match are skipped.  Returns
-    (precision, recall, f1) as floats; returns (0, 0, 0) if no valid
-    documents remain.
-    """
     y_true, y_pred = [], []
+
+    total_docs = 0
+    used_docs = 0
+    skipped_missing_gold = 0
+    skipped_token_mismatch = 0
+
     for doc in docs:
+        total_docs += 1
         row_id = doc["row_id"]
         text = doc["full_text"]
+
+        if row_id not in gold_map:
+            skipped_missing_gold += 1
+            continue
+
         gold_tokens, gold_labels = gold_map[row_id]
         pseudo_entities = pseudo_by_row.get(row_id, [])
         pred_tokens, pred_labels = span_to_bio(text, pseudo_entities)
+
         if pred_tokens != gold_tokens:
+            skipped_token_mismatch += 1
             continue
         if len(pred_labels) != len(gold_labels):
+            skipped_token_mismatch += 1
             continue
+
         y_true.append(gold_labels)
         y_pred.append(pred_labels)
+        used_docs += 1
+
+    # Surface skip counts so any silent doc-dropping is visible, exactly like
+    # bc5cdr_evaluation.py reports. These should read 0 once the gold sources match.
+    print(
+        f"    [used {used_docs}/{total_docs}  "
+        f"missing_gold {skipped_missing_gold}  "
+        f"token_mismatch {skipped_token_mismatch}]"
+    )
+
     if not y_true:
         return 0.0, 0.0, 0.0
     return (
@@ -116,13 +128,12 @@ def evaluate_pseudo_gold(docs, gold_map, pseudo_by_row):
     )
 
 
-def plot_combined_curve(thresholds, precisions, recalls, f1s, output_file):
-    """
-    Plot precision, recall, and F1 as a function of the voting threshold.
+# ------------------------------------------------------------------
+# Plotting
+# ------------------------------------------------------------------
 
-    Annotates the F1 peak with a vertical dashed line and a text label so
-    the operating threshold choice is self-evident in the figure.
-    """
+
+def plot_combined_curve(thresholds, precisions, recalls, f1s, output_file):
     fig, ax = plt.subplots(figsize=(10, 6))
     ax.plot(
         thresholds,
@@ -152,13 +163,10 @@ def plot_combined_curve(thresholds, precisions, recalls, f1s, output_file):
         label="F1-score",
     )
 
+    # Mark the F1 peak
     peak_idx = int(np.argmax(f1s))
     ax.axvline(
-        thresholds[peak_idx],
-        color="#999999",
-        linestyle="--",
-        linewidth=1.2,
-        alpha=0.7,
+        thresholds[peak_idx], color="#999999", linestyle="--", linewidth=1.2, alpha=0.7
     )
     ax.annotate(
         f"Peak F1 = {f1s[peak_idx]:.3f}\n(threshold = {thresholds[peak_idx]})",
@@ -184,12 +192,6 @@ def plot_combined_curve(thresholds, precisions, recalls, f1s, output_file):
 
 
 def plot_per_threshold_bars(threshold, p, r, f, output_file):
-    """
-    Bar chart showing precision, recall, and F1 at a single threshold.
-
-    Produced for every threshold in the sweep so individual thresholds can
-    be inspected separately from the combined curve.
-    """
     metrics = ["Precision", "Recall", "F1-score"]
     values = [p, r, f]
     colors = [COL_PRECISION, COL_RECALL, COL_F1]
@@ -199,7 +201,7 @@ def plot_per_threshold_bars(threshold, p, r, f, output_file):
     ax.bar(x, values, width=0.55, color=colors, edgecolor="#333333", linewidth=0.6)
     ax.set_xticks(x)
     ax.set_xticklabels(metrics, fontsize=12)
-    ax.set_ylim(0, 1.15)  # extra headroom so value labels don't hit the title
+    ax.set_ylim(0, 1.15)  # headroom so value labels never collide with title
     ax.set_ylabel("Score", fontsize=13)
     ax.set_title(
         f"Pseudo-Gold vs Human Gold (threshold = {threshold})", fontsize=13, pad=18
@@ -216,15 +218,19 @@ def plot_per_threshold_bars(threshold, p, r, f, output_file):
     print(f"  Saved bar chart (threshold {threshold}) -> {output_file}")
 
 
+# ------------------------------------------------------------------
+# Main
+# ------------------------------------------------------------------
+
+
 def main():
     os.makedirs(FIG_DIR, exist_ok=True)
     os.makedirs(FIG_DIR / "sensitivity", exist_ok=True)
 
     print("Loading documents and human gold...")
     docs = load_jsonl(DOCS_FILE)
-    gold_entities = load_jsonl(GOLD_FILE)
-    gold_by_row = group_by_row(gold_entities)
-    gold_map = build_gold_map(docs, gold_by_row)
+    gold_bio_records = load_jsonl(GOLD_BIO_FILE)
+    gold_map = build_gold_map(gold_bio_records)
     print(f"Loaded {len(docs)} documents.\n")
 
     precisions, recalls, f1s = [], [], []
@@ -237,7 +243,7 @@ def main():
     for t in THRESHOLDS:
         sens_file = SENS_DIR / f"weighted_candidate_gold_{t}.jsonl"
         if not sens_file.exists():
-            print(f"[WARNING] Missing {sens_file} — run candidate_gold.py first")
+            print(f"[WARNING] Missing {sens_file} - run candidate_gold.py first")
             precisions.append(0.0)
             recalls.append(0.0)
             f1s.append(0.0)
