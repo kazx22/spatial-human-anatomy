@@ -8,13 +8,13 @@ All models are evaluated **zero-shot** — no fine-tuning was performed.
 
 ## Models and Checkpoints
 
-| Model            | Checkpoint(s)                                                                                                                           | Architecture           |
-| ---------------- | --------------------------------------------------------------------------------------------------------------------------------------- | ---------------------- |
-| **SciSpacy**     | `en_ner_bc5cdr_md`                                                                                                                      | spaCy pipeline         |
-| **BioBERT**      | `alvaroalon2/biobert_diseases_ner` + `alvaroalon2/biobert_chemical_ner`                                                                 | BERT (dual-model)      |
-| **PubMedBERT**   | `sarahmiller137/BiomedNLP-PubMedBERT-base-uncased-abstract-fulltext-ft-ncbi-disease` + `OpenMed/OpenMed-NER-ChemicalDetect-PubMed-335M` | BERT (dual-model)      |
-| **ClinicalBERT** | `samrawal/bert-base-uncased_clinical-ner`                                                                                               | BERT (single-model)    |
-| **BioELECTRA**   | `d4data/biomedical-ner-all`                                                                                                             | ELECTRA (single-model) |
+| Model | Checkpoint(s) | Architecture |
+|---|---|---|
+| **SciSpacy** | `en_ner_bc5cdr_md` | spaCy pipeline |
+| **BioBERT** | `alvaroalon2/biobert_diseases_ner` + `alvaroalon2/biobert_chemical_ner` | BERT (dual-model) |
+| **PubMedBERT** | `sarahmiller137/BiomedNLP-PubMedBERT-base-uncased-abstract-fulltext-ft-ncbi-disease` + `OpenMed/OpenMed-NER-ChemicalDetect-PubMed-335M` | BERT (dual-model) |
+| **ClinicalBERT** | `samrawal/bert-base-uncased_clinical-ner` | BERT (single-model) |
+| **BioELECTRA** | `d4data/biomedical-ner-all` | ELECTRA (single-model) |
 
 BioBERT and PubMedBERT use separate checkpoints for disease and chemical entity types. ClinicalBERT's native label space (`problem`, `treatment`, `test`) is mapped to BC5CDR equivalents at inference; `test` spans are dropped as they have no BC5CDR counterpart.
 
@@ -43,13 +43,13 @@ data/raw/bc5cdr/
 
 Each model is weighted by its measured F1 score against human gold on BC5CDR:
 
-| Model        | F1 (vs Human Gold) | Weight |
-| ------------ | ------------------ | ------ |
-| SciSpacy     | 0.896              | 0.8959 |
-| BioBERT      | 0.726              | 0.7259 |
-| PubMedBERT   | 0.568              | 0.5677 |
-| BioELECTRA   | 0.547              | 0.5470 |
-| ClinicalBERT | 0.421              | 0.4213 |
+| Model | F1 (vs Human Gold) | Weight |
+|---|---|---|
+| SciSpacy | 0.896 | 0.8959 |
+| BioBERT | 0.726 | 0.7259 |
+| PubMedBERT | 0.568 | 0.5677 |
+| BioELECTRA | 0.547 | 0.5470 |
+| ClinicalBERT | 0.421 | 0.4213 |
 
 A span is admitted to the pseudo-gold set when the sum of the F1 weights of models that predicted it meets or exceeds the voting threshold (default **1.5**). This threshold sits above any single model's weight, so no single model can unilaterally admit a span. A threshold sensitivity sweep (0.45–2.00) confirmed that F1 peaks at 1.5 (F1 = 0.848, precision = 0.989, recall = 0.742).
 
@@ -160,22 +160,85 @@ python -m src.threshold_sensitivity      # Threshold sensitivity curve
 
 Performance against BC5CDR human gold annotations (BC5CDR train split, zero-shot):
 
-| Model        | Precision | Recall | F1       |
-| ------------ | --------- | ------ | -------- |
-| SciSpacy     | 0.93      | 0.86   | **0.90** |
-| BioBERT      | 0.63      | 0.86   | 0.73     |
-| PubMedBERT   | 0.49      | 0.67   | 0.57     |
-| BioELECTRA   | 0.59      | 0.51   | 0.55     |
-| ClinicalBERT | 0.36      | 0.50   | 0.42     |
+| Model | Precision | Recall | F1 |
+|---|---|---|---|
+| SciSpacy | 0.93 | 0.86 | **0.90** |
+| BioBERT | 0.63 | 0.86 | 0.73 |
+| PubMedBERT | 0.49 | 0.67 | 0.57 |
+| BioELECTRA | 0.59 | 0.51 | 0.55 |
+| ClinicalBERT | 0.36 | 0.50 | 0.42 |
 
 Pseudo-gold quality against human gold:
 
-| Framework                                 | Precision | Recall | F1        |
-| ----------------------------------------- | --------- | ------ | --------- |
-| Majority Candidate Gold                   | 0.931     | 0.540  | 0.683     |
-| Weighted Candidate Gold (threshold = 1.5) | 0.989     | 0.741  | **0.848** |
+| Framework | Precision | Recall | F1 |
+|---|---|---|---|
+| Majority Candidate Gold | 0.931 | 0.540 | 0.683 |
+| Weighted Candidate Gold (threshold = 1.5) | 0.989 | 0.741 | **0.848** |
 
 This is a comparative study. Results reflect off-the-shelf performance and should not be compared directly to fine-tuned baselines.
+
+---
+
+## Analysis Results
+
+### Bootstrap Significance Testing
+
+Paired bootstrap significance testing (1000 resamples, seed = 42) on 500 BC5CDR training documents. All pairwise F1 differences are statistically significant at p < 0.05 except PubMedBERT vs BioELECTRA (p = 0.041, F1 gap = 0.021).
+
+**95% Bootstrap Confidence Intervals on F1:**
+
+| Model | F1 | 95% CI |
+|---|---|---|
+| SciSpacy | 0.8959 | [0.8868, 0.9049] |
+| BioBERT | 0.7259 | [0.7134, 0.7382] |
+| PubMedBERT | 0.5677 | [0.5475, 0.5863] |
+| BioELECTRA | 0.5470 | [0.5294, 0.5638] |
+| ClinicalBERT | 0.4213 | [0.4051, 0.4362] |
+
+**Pairwise Significance (paired bootstrap, p < 0.05 threshold):**
+
+| Pair | F1 diff | p-value | Significant | Better model |
+|---|---|---|---|---|
+| SciSpacy vs BioBERT | +0.1701 | 0.0000 | Yes | SciSpacy |
+| SciSpacy vs PubMedBERT | +0.3283 | 0.0000 | Yes | SciSpacy |
+| SciSpacy vs ClinicalBERT | +0.4747 | 0.0000 | Yes | SciSpacy |
+| SciSpacy vs BioELECTRA | +0.3490 | 0.0000 | Yes | SciSpacy |
+| BioBERT vs PubMedBERT | +0.1582 | 0.0000 | Yes | BioBERT |
+| BioBERT vs ClinicalBERT | +0.3046 | 0.0000 | Yes | BioBERT |
+| BioBERT vs BioELECTRA | +0.1789 | 0.0000 | Yes | BioBERT |
+| PubMedBERT vs ClinicalBERT | +0.1464 | 0.0000 | Yes | PubMedBERT |
+| PubMedBERT vs BioELECTRA | +0.0207 | 0.0410 | Yes (marginal) | PubMedBERT |
+| ClinicalBERT vs BioELECTRA | −0.1257 | 0.0000 | Yes | BioELECTRA |
+
+---
+
+### Cohen's Kappa
+![Cohen's Kappa](figure/kappa_heatmap.png)
+Token-level BIO label agreement across 93,024 tokens (500 documents). Interpreted using the Landis & Koch (1977) scale.
+
+**Model vs Human Gold:**
+
+| Model | κ | Interpretation |
+|---|---|---|
+| SciSpacy | 0.9219 | Almost perfect |
+| BioELECTRA | 0.5663 | Moderate |
+| BioBERT | 0.4694 | Moderate |
+| ClinicalBERT | 0.4439 | Moderate |
+| PubMedBERT | 0.4363 | Moderate |
+
+SciSpacy achieves near-expert agreement with BC5CDR human gold (κ = 0.922). The remaining four models cluster in the Moderate range (0.436–0.566).
+
+**Pairwise Inter-Model Kappa:**
+
+| | SciSpacy | BioBERT | PubMedBERT | ClinicalBERT | BioELECTRA |
+|---|---|---|---|---|---|
+| SciSpacy | 1.000 | 0.430 | 0.404 | 0.437 | 0.552 |
+| BioBERT | 0.430 | 1.000 | 0.763 | 0.257 | 0.264 |
+| PubMedBERT | 0.404 | 0.763 | 1.000 | 0.253 | 0.280 |
+| ClinicalBERT | 0.437 | 0.257 | 0.253 | 1.000 | 0.359 |
+| BioELECTRA | 0.552 | 0.264 | 0.280 | 0.359 | 1.000 |
+
+Inter-model kappa mean = 0.400 (Moderate), std = 0.153. The high BioBERT–PubMedBERT agreement (κ = 0.763, Substantial) reflects their shared BERT pretraining on biomedical text — they make similar mistakes even though they use different checkpoints. ClinicalBERT has the lowest pairwise agreement with all other models (κ = 0.253–0.437), consistent with its i2b2 training domain. The moderate inter-model disagreement overall supports the rationale for the weighted ensemble framework — if the models agreed, majority voting would add nothing.
 
 ---
 
@@ -273,13 +336,13 @@ Full-size individual confusion matrices for all five models, equivalent to the p
 
 Experiments were run on an NVIDIA RTX 3070 Ti Mobile (8 GB VRAM). Approximate inference times per document:
 
-| Model        | Avg. time/doc |
-| ------------ | ------------- |
-| SciSpacy     | 0.024 s       |
-| BioELECTRA   | 0.13 s        |
-| ClinicalBERT | 0.21 s        |
-| BioBERT      | 0.46 s        |
-| PubMedBERT   | 3.48 s        |
+| Model | Avg. time/doc |
+|---|---|
+| SciSpacy | 0.024 s |
+| BioELECTRA | 0.13 s |
+| ClinicalBERT | 0.21 s |
+| BioBERT | 0.46 s |
+| PubMedBERT | 3.48 s |
 
 ---
 
