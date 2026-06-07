@@ -213,7 +213,7 @@ Paired bootstrap significance testing (1000 resamples, seed = 42) on 500 BC5CDR 
 ---
 
 ### Cohen's Kappa
-
+![Cohen's Kappa](figure/kappa_heatmap.png)
 Token-level BIO label agreement across 93,024 tokens (500 documents). Interpreted using the Landis & Koch (1977) scale.
 
 **Model vs Human Gold:**
