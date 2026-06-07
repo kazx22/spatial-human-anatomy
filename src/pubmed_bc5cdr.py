@@ -141,6 +141,9 @@ def predictions_to_entities(predictions, row_id, label_name, full_text, char_off
         if (end_char - start_char) > MAX_ENTITY_CHARS:
             continue
 
+        if (end_char - start_char) < 5:
+            print(f"SHORT ENTITY: pred={pred}, surface='{surface}'")
+
         entities.append(
             {
                 "row_id": row_id,
@@ -241,17 +244,23 @@ def run_pubmedbert(docs):
 
 if __name__ == "__main__":
     input_file = Path("data/processed/bc5cdr/bc5cdr_train_docs.jsonl")
-    output_file = Path("data/processed/bc5cdr/pubmedbert_train_entities_bc5cdr.jsonl")
 
-    print("Loading BC5CDR train docs...")
     docs = load_jsonl(input_file)
-    print(f"Loaded {len(docs)} documents")
+    docs = docs[:10]  # just 10 docs for the debug run
 
-    print("Running PubMedBERT disease + chemical models with chunking...")
     entities = run_pubmedbert(docs)
+    # input_file = Path("data/processed/bc5cdr/bc5cdr_train_docs.jsonl")
+    # output_file = Path("data/processed/bc5cdr/pubmedbert_train_entities_bc5cdr.jsonl")
 
-    save_jsonl(entities, output_file)
-    print(f"Saved PubMedBERT entities to {output_file}")
+    # print("Loading BC5CDR train docs...")
+    # docs = load_jsonl(input_file)
+    # print(f"Loaded {len(docs)} documents")
+
+    # print("Running PubMedBERT disease + chemical models with chunking...")
+    # entities = run_pubmedbert(docs)
+
+    # save_jsonl(entities, output_file)
+    # print(f"Saved PubMedBERT entities to {output_file}")
 
 
 # Total time taken: 1891.17 seconds
