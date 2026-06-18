@@ -1,6 +1,6 @@
 # Biomedical NER — Comparative Evaluation on BC5CDR
 
-This repository contains the code for a comparative evaluation of five off-the-shelf biomedical named entity recognition models on the BC5CDR corpus, along with a weighted content-aware pseudo-gold majority voting framework for ensemble annotation quality assessment.
+This repository contains the code for a comparative evaluation of five off-the-shelf biomedical named entity recognition models on the BC5CDR corpus, along with a weighted pseudo-gold majority voting framework for ensemble annotation quality assessment.
 
 All models are evaluated **zero-shot** — no fine-tuning was performed.
 
